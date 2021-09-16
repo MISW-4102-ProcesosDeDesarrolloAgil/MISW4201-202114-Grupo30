@@ -24,29 +24,26 @@ class VistaCancionesUsuario(Resource):
         except IntegrityError:
             db.session.rollback()
             return 'El usuario ya tiene una cancion con dicho nombre',409
-    
+
         return cancion_schema.dump(nueva_cancion)
 
     # @jwt_required()
+
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
         propios = []
+
         for c in usuario.canciones:
-            c.propia = 'True'
             propios.append(c)
 
-        compartidos = []
+        # compartidos = []
         for c in usuario.compartidos:
-            cc = Cancion.query.filter(Cancion.id == c.cancion.id).first()
-            cc.propia = 'False'
-            compartidos.append(cc)
+            if c.cancion_id != None :
+                cc = Cancion.query.filter(Cancion.id == c.cancion_id).first()
+                cc.propia = 'False'
+                propios.append(cc)
 
-        canciones = []
-        for cancion in propios + compartidos:
-            if cancion not in canciones:
-                canciones.append(cancion)
-
-        return [cancion_schema.dump(ca) for ca in canciones]
+        return [cancion_schema.dump(ca) for ca in propios]
 
 class VistaCancion(Resource):
 
@@ -129,18 +126,13 @@ class VistaAlbumesUsuario(Resource):
         for a in usuario.albumes:
             propios.append(a)
 
-        compartidos = []
         for c in usuario.compartidos:
-            ac = Album.query.filter(Album.id == c.album.id).first()
-            ac.propio = 0
-            compartidos.append(ac)
-
-        albumes = []
-        for album in propios + compartidos:
-            if album not in albumes:
-                albumes.append(album)
-
-        return [album_schema.dump(al) for al in albumes]
+            if c.album_id != None :
+                ac = Album.query.filter(Album.id == c.album_id).first()
+                ac.propio = 0
+                propios.append(ac)
+        
+        return [album_schema.dump(al) for al in propios]
 
 class VistaUsuario(Resource):
     def get(self, id_usuario):
@@ -212,34 +204,44 @@ class VistaRecursosCompartidos(Resource):
         id_recurso = request.json["id_recurso"]
 
         if usuario_destino == None or usuario_origen_id == None:
+            db.session.rollback()
             return "Error. El usuario destinatario o de origen no puede ser vacio", 400
 
         if type(usuario_destino) != str:
+            db.session.rollback()
             return "Error. El usuario destinatario debe ser un texto", 400
 
         if type(usuario_origen_id) != int:
+            db.session.rollback()
             return "Error. El id de usuario origen debe ser un numero", 400
 
         usuario_o = Usuario.query.filter(Usuario.id == usuario_origen_id).first()
         if usuario_o is None:
+            db.session.rollback()
             return "El usuario origen no existe", 400
 
         if tipo_recurso == None:
+            db.session.rollback()
             return "Error. El tipo de recurso no puede ser vacio", 400
 
         if tipo_recurso != "ALBUM" and tipo_recurso != "CANCION":
+            db.session.rollback()
             return "Error. El tipo de recurso debe ser ALBUM o CANCION", 400
 
         if id_recurso == None:
+            db.session.rollback()
             return "Error. El id de recurso no puede ser vacio", 400
 
         usuarios_destinos = usuario_destino.split(',')
+        print(usuarios_destinos)
         for ud in usuarios_destinos:
             usuario_d = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario_d is None:
                 if tipo_recurso == "ALBUM":
+                    db.session.rollback()
                     return 'No se puede compartir el álbum porque una o más personas no se encuentran registradas en Ionic.', 400
                 else:
+                    db.session.rollback()
                     return 'No se puede compartir la canción porque una o más personas no se encuentran registradas en Ionic.', 400
 
             recurso_compartido = RecursoCompartido(
@@ -252,8 +254,8 @@ class VistaRecursosCompartidos(Resource):
             else:
                 recurso_compartido.cancion_id = id_recurso
 
+            db.session.add(recurso_compartido)
 
-        db.session.add(recurso_compartido)
         db.session.commit()
         return recurso_compartido_schema.dump(recurso_compartido)
 

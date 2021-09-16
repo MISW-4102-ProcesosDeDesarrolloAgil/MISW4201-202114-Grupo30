@@ -1,11 +1,56 @@
 {
-    "/api/*":{
-        "target": "http://localhost:5000",
+    "/canciones/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
         "secure": false,
         "logLevel": "debug",
-        "pathRewrite":{
-            "^/api/": ""
-        },
+        "changeOrigin": true
+    },
+    "/albumes/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/usuario/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/cancion/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/signin/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/logIn/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/album/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/recurso/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/usuarios/*":{
+        "target": "https://ionic-grupo30.herokuapp.com",
+        "secure": false,
+        "logLevel": "debug",
         "changeOrigin": true
     }
 }
