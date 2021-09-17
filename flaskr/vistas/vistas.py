@@ -1,6 +1,7 @@
 from flask import request
+from marshmallow.fields import Date
 from sqlalchemy.orm import query
-from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema
+from flaskr.modelos.modelos import Notificacion, db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, NotificacionSchema
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
@@ -9,6 +10,7 @@ cancion_schema = CancionSchema()
 usuario_schema = UsuarioSchema()
 album_schema = AlbumSchema()
 recurso_compartido_schema = RecursoCompartidoSchema()
+notificacion_schema = NotificacionSchema()
 
 
 class VistaCancionesUsuario(Resource):
@@ -289,3 +291,19 @@ class VistaCancionUsuariosCompartidos(Resource):
             u = Usuario.query.filter(Usuario.id == rc.usuario_destino_id).first()
             usuarios.append(u)
         return [usuario_schema.dump(u) for u in usuarios]
+
+class VistaNotificacionUsuario(Resource):
+    
+    #@jwt_required()
+    def post(self, id_usuario):
+        nuevo_notificacion = Notificacion(mensaje=request.json["mensaje"], tipo_notificacion=request.json["tipo"])
+        usuario = Usuario.query.get_or_404(id_usuario)
+        usuario.notificaciones.append(nuevo_notificacion)
+        db.session.commit()
+
+        return notificacion_schema.dump(nuevo_notificacion)
+
+    # @jwt_required()
+    def get(self, id_usuario):
+        usuario = Usuario.query.get_or_404(id_usuario)
+        return [notificacion_schema.dump(ca) for ca in usuario.notificaciones]

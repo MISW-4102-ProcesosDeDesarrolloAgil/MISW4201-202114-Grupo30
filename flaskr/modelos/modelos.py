@@ -2,6 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow import fields
 import enum
+import datetime
+import pytz
 
 
 db = SQLAlchemy()
@@ -30,6 +32,11 @@ class TipoRecurso(enum.Enum):
     ALBUM = 1
     CANCION = 2
 
+class TipoNotificacion(enum.Enum):
+   COMPARTIR = 1 
+   COMENTAR = 2
+   CALIFICAR = 3
+
 class Album(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(128))
@@ -56,6 +63,14 @@ class Usuario(db.Model):
     albumes = db.relationship('Album', cascade='all, delete, delete-orphan')
     compartidos = db.relationship('RecursoCompartido', backref='usuario_destino')
     canciones = db.relationship('Cancion', cascade='all, delete, delete-orphan')
+    notificaciones = db.relationship('Notificacion', cascade='all, delete, delete-orphan')
+
+class Notificacion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_registro = db.Column(db.DateTime(timezone=True), default=datetime.datetime.now(pytz.timezone('Etc/GMT+5')))
+    mensaje = db.Column(db.String(512))
+    tipo_notificacion = db.Column(db.Enum(TipoNotificacion))
+    usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
 
 class EnumADiccionario(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -86,5 +101,12 @@ class RecursoCompartidoSchema(SQLAlchemyAutoSchema):
     tipo_recurso = EnumADiccionario(attribute=("tipo_recurso"))
     class Meta:
          model = RecursoCompartido
+         include_relationships = True
+         load_instance = True
+
+class NotificacionSchema(SQLAlchemyAutoSchema):
+    tipo_notificacion = EnumADiccionario(attribute=("tipo_notificacion"))
+    class Meta:
+         model = Notificacion
          include_relationships = True
          load_instance = True
