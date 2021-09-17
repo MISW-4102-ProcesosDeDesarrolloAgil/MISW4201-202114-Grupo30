@@ -3,7 +3,6 @@ import unittest
 import json
 import string
 import random
-from datetime import datetime
 from flaskr.app import app
 
 ROUTE_POST = '/comentario'
@@ -16,7 +15,6 @@ class ComentarioTestCase(BaseTestClass):
                 data=json.dumps(dict(
                     usuario=1,
                     cancion_id=1,
-                    time = datetime.now(),
                     texto=None
                 )),
                 content_type='application/json', follow_redirects=True
@@ -33,7 +31,6 @@ class ComentarioTestCase(BaseTestClass):
                 data=json.dumps(dict(
                     usuario=None,
                     album_id=1,
-                    time = datetime.now(),
                     texto=self.generate_text()
                 )),
                 content_type='application/json', follow_redirects=True
@@ -50,7 +47,6 @@ class ComentarioTestCase(BaseTestClass):
                 data=json.dumps(dict(
                     usuario=1,
                     cancion_id=None,
-                    time = datetime.now(),
                     texto=self.generate_text()
                 )),
                 content_type='application/json', follow_redirects=True
@@ -65,7 +61,6 @@ class ComentarioTestCase(BaseTestClass):
                 data=json.dumps(dict(
                     usuario=1,
                     album_id=None,
-                    time = datetime.now(),
                     texto=self.generate_text()
                 )),
                 content_type='application/json', follow_redirects=True
@@ -82,7 +77,6 @@ class ComentarioTestCase(BaseTestClass):
                 data=json.dumps(dict(
                     usuario=1,
                     album_id=1,
-                    time = datetime.now(),
                     texto=self.generate_text(1005)
                 )),
                 content_type='application/json', follow_redirects=True

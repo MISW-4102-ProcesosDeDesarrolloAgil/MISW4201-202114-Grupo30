@@ -99,3 +99,9 @@ class RecursoCompartidoSchema(SQLAlchemyAutoSchema):
          model = RecursoCompartido
          include_relationships = True
          load_instance = True
+
+class ComentarioSchema(SQLAlchemyAutoSchema):
+    class Meta:
+         model = Comentario
+         include_relationships = True
+         load_instance = True
