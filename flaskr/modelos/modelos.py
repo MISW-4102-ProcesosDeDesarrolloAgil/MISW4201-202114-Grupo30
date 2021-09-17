@@ -33,9 +33,10 @@ class TipoRecurso(enum.Enum):
     CANCION = 2
 
 class TipoNotificacion(enum.Enum):
-   COMPARTIR = 1 
-   COMENTAR = 2
-   CALIFICAR = 3
+   COMPARTIR_ALBUM = 1 
+   COMPARTIR_CANCION = 2
+   COMENTAR = 3
+   CALIFICAR = 4
 
 class Album(db.Model):
     id = db.Column(db.Integer, primary_key=True)
