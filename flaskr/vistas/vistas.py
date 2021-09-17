@@ -318,14 +318,13 @@ class VistaNotificacionUsuario(Resource):
         mensaje = mensaje.format(usuarioOrigen.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
         
         usuarios = usuarios_destino.split(',')
-        print(usuarios)
         for ud in usuarios:
             usuario = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario is not None:
                 nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)       
                 usuario.notificaciones.append(nuevo_notificacion)
-                db.session.commit()
-
+                
+        db.session.commit()
         return notificacion_schema.dump(nuevo_notificacion)
 
     # @jwt_required()
