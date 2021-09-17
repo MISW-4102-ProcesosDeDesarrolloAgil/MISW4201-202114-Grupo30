@@ -300,12 +300,13 @@ class VistaNotificacionUsuario(Resource):
     def post(self, id_usuario):
         tipo_notificacion = request.json["tipo"]
         nombre_recurso = request.json["nombre"]
+        usuarios_destino = request.json["usuarios"]
         
-        if tipo_notificacion == None or nombre_recurso == None:
+        if tipo_notificacion == None or nombre_recurso == None or usuarios_destino == None:
             db.session.rollback()
             return "Error. El tipo y el nombre de recurso no pueden ser vacio", 400
         
-        usuario = Usuario.query.get_or_404(id_usuario)
+        usuarioOrigen = Usuario.query.get_or_404(id_usuario)
         #armar mensaje
         if tipo_notificacion == TipoNotificacion.COMPARTIR_ALBUM.name:
             mensaje = "El usuario {} le ha compartido el álbum {} el día {}";
@@ -314,11 +315,16 @@ class VistaNotificacionUsuario(Resource):
         else:
             mensaje = "El usuario {} le ha compartido {} el día {}";
 
-        mensaje = mensaje.format(usuario.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
-        nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)
+        mensaje = mensaje.format(usuarioOrigen.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
         
-        usuario.notificaciones.append(nuevo_notificacion)
-        db.session.commit()
+        usuarios = usuarios_destino.split(',')
+        print(usuarios)
+        for ud in usuarios:
+            usuario = Usuario.query.filter(Usuario.nombre == ud).first()
+            if usuario is not None:
+                nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)       
+                usuario.notificaciones.append(nuevo_notificacion)
+                db.session.commit()
 
         return notificacion_schema.dump(nuevo_notificacion)
 

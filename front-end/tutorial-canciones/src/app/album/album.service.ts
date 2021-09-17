@@ -5,6 +5,7 @@ import { Album } from './album';
 import { Cancion } from '../cancion/cancion';
 import { Usuario } from '../usuario/usuario';
 import { environment } from 'src/environments/environment.prod';
+import { RecursoAlbum } from './recurso_album';
 
 @Injectable({
   providedIn: 'root'
@@ -60,11 +61,11 @@ export class AlbumService {
       )
   }
 
-  compartirAlbum(idAlbum: number, idUsuarioD: string, idUsuario: number, token: string):Observable<Album>{
+  compartirAlbum(idAlbum: number, idUsuarioD: string, idUsuario: number, token: string):Observable<RecursoAlbum>{
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     })
-    return this.http.post<Album>(`${this.backUrl}/recurso/compartido`,
+    return this.http.post<RecursoAlbum>(`${this.backUrl}/recurso/compartido`,
       {
         "usuario_origen_id": idUsuario,
         "usuario_destino": idUsuarioD,
