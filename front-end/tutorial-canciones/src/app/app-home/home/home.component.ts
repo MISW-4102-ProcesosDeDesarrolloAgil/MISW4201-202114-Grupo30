@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router} from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { UsuarioService } from '../../usuario/usuario.service';
 import { Notificacion } from '../notificacion';
@@ -13,6 +13,7 @@ import { NotificacionService } from '../notificacion.service';
 export class HomeComponent implements OnInit {
 
   notificaciones: Notificacion[];
+  cantidad:number = 0;
 
   get session(){
      return this.usuarioServicio.session;
@@ -22,20 +23,23 @@ export class HomeComponent implements OnInit {
     private router: Router,
     private toastr: ToastrService,
     private usuarioServicio: UsuarioService,
-    private notificacionService: NotificacionService) { }
+    private notificacionService: NotificacionService) {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {   
   }
 
   consultarNotificaciones(){
-    this.notificacionService.getNotificacionesUsuario(this.session.id)
-    .subscribe(notificacion => {  
-      this.notificaciones = notificacion;
-      console.log(this.notificaciones)   
-    },
-      error => {    
-          this.showError(error.error)
-      })
+    if (this.session.id){    
+      this.notificacionService.getNotificacionesUsuario(this.session.id)
+      .subscribe(notificacion => {  
+        this.notificaciones = notificacion;
+        this.cantidad = this.notificaciones.length;
+        console.log(this.notificaciones)        
+      },
+        error => {    
+            this.showError(error.error)
+        })
+    }
   }
 
   cerrarSession() {

@@ -52,9 +52,9 @@
                 <mat-icon>login</mat-icon>
                 Ingresar
             </button>
-            <a *ngIf="session.nombre" (click)="consultarNotificaciones();sidenoti.toggle()">
-                <img src="/assets/images/notifications_active.png" alt="image">
-            </a>
+            <button *ngIf="session.nombre" (click)="consultarNotificaciones();sidenoti.toggle()" mat-button>
+                <mat-icon>notifications</mat-icon>
+            </button>
             <button *ngIf="session.nombre" id="btn_salir" mat-button (click)="cerrarSession()">
                 <mat-icon>logout</mat-icon>
                 Salir
@@ -71,9 +71,9 @@
         <mat-toolbar color="primary">
             <span>Notificaciones </span>
             <span class="spacer"></span>
-            <a *ngIf="session.nombre" (click)="sidenoti.toggle()">
-                <img src="/assets/images/notifications_active.png" alt="image">
-            </a>
+            <button (click)="sidenoti.toggle()" mat-button>
+                <mat-icon [matBadge]="cantidad">notifications</mat-icon>
+            </button>
         </mat-toolbar>
 
         <ul class="notifications">
