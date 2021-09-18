@@ -5,6 +5,7 @@ import { Cancion } from './cancion';
 import { Album } from '../album/album';
 import { Usuario } from '../usuario/usuario';
 import { environment } from 'src/environments/environment.prod';
+import { RecursoCancion } from './recurso_cancion';
 
 @Injectable({
   providedIn: 'root'
@@ -54,11 +55,11 @@ export class CancionService {
     return this.http.delete<Cancion>(`${this.backUrl}/cancion/${cancionId}`)
   }
 
-  compartirCancion(idCancion: number, idUsuarioD: string, idUsuario: number, token: string):Observable<Cancion>{
+  compartirCancion(idCancion: number, idUsuarioD: string, idUsuario: number, token: string):Observable<RecursoCancion>{
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     })
-    return this.http.post<Cancion>(`${this.backUrl}/recurso/compartido`,
+    return this.http.post<RecursoCancion>(`${this.backUrl}/recurso/compartido`,
       {
         "usuario_origen_id": idUsuario,
         "usuario_destino": idUsuarioD,
