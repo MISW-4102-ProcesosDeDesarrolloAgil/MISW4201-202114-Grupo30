@@ -330,4 +330,5 @@ class VistaNotificacionUsuario(Resource):
     # @jwt_required()
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
-        return [notificacion_schema.dump(ca) for ca in usuario.notificaciones]
+        notificaciones = sorted(usuario.notificaciones, key=lambda x: x.id, reverse=True);
+        return [notificacion_schema.dump(ca) for ca in notificaciones]
