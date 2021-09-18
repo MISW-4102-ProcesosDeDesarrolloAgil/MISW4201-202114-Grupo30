@@ -1,4 +1,4 @@
-<mat-sidenav-container fullscreen>
+<mat-sidenav-container fullscreen [hasBackdrop]="false">
 
     <mat-sidenav #sidenav>
 
@@ -52,7 +52,7 @@
                 <mat-icon>login</mat-icon>
                 Ingresar
             </button>
-            <a *ngIf="session.nombre">
+            <a *ngIf="session.nombre" (click)="consultarNotificaciones();sidenoti.toggle()">
                 <img src="/assets/images/notifications_active.png" alt="image">
             </a>
             <button *ngIf="session.nombre" id="btn_salir" mat-button (click)="cerrarSession()">
@@ -65,6 +65,24 @@
 
 
     </mat-toolbar>
+
+    <mat-sidenav #sidenoti position="end" #mode value="over" style="width: 300px;">
+
+        <mat-toolbar color="primary">
+            <span>Notificaciones </span>
+            <span class="spacer"></span>
+            <a *ngIf="session.nombre" (click)="sidenoti.toggle()">
+                <img src="/assets/images/notifications_active.png" alt="image">
+            </a>
+        </mat-toolbar>
+
+        <ul class="notifications">
+            <li class="notification" *ngFor="let item of notificaciones">
+                <p>{{item.mensaje}}</p>
+            </li>
+        </ul>
+
+    </mat-sidenav>
 
 
     <div class="container" style="padding-bottom:100px;">
