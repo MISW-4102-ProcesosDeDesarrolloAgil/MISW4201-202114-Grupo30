@@ -7,6 +7,8 @@ import { UsuarioService } from 'src/app/usuario/usuario.service';
 import { AlbumService } from '../album.service';
 import { Album } from '../album';
 import { Usuario } from 'src/app/usuario/usuario';
+import { NotificacionService } from 'src/app/app-home/notificacion.service';
+import { RecursoAlbum } from '../recurso_album';
 
 @Component({
   selector: 'app-album-share',
@@ -27,6 +29,7 @@ export class AlbumShareComponent implements OnInit {
     public dialogRef: MatDialogRef<AlbumShareComponent>,
     private router: ActivatedRoute,
     private routerPath: Router,
+    private notificacionService: NotificacionService,
     @Inject(MAT_DIALOG_DATA) public data: DialogData) { }
 
 
@@ -41,9 +44,11 @@ export class AlbumShareComponent implements OnInit {
   shareAlbum() {
     if (this.data.users_names) {
       this.albumService.compartirAlbum(this.data.album_id, this.data.users_names, this.data.userId, this.data.token)
-        .subscribe(album => {
-          this.showSuccess(album)
-          this.routerPath.navigate([`/ionic/albumes/${this.userId}/${this.token}`])
+        .subscribe(recurso => {    
+          //alert(JSON.stringify(recurso))     
+          this.showSuccess(this.album);
+          this.crearNotificacion();
+          
         },
           error => {
             if (error.error) {
@@ -66,6 +71,30 @@ export class AlbumShareComponent implements OnInit {
       else {
         this.showError("Antes de compartir es necesario mínimo escoger un usuario.")
       }
+  }
+
+  crearNotificacion(){
+    this.notificacionService.crearNotificacion(this.data.userId, this.data.token, "COMPARTIR_ALBUM", this.data.titulo, this.data.users_names)
+    .subscribe(notificacion => {         
+      this.routerPath.navigate([`/ionic/albumes/${this.userId}/${this.token}`])
+    },
+      error => {
+        if (error.error) {
+          this.showError(error.error)
+          this.routerPath.navigate([`/ionic/albumes/${this.userId}/${this.token}`])
+        }
+        else if (error.statusText === "UNAUTHORIZED") {
+          this.showWarning("Su sesión ha caducado, por favor vuelva a iniciar sesión.")
+          this.cerrarSession();
+        }
+        else if (error.statusText === "UNPROCESSABLE ENTITY") {
+          this.showError("No hemos podido identificarlo, por favor vuelva a iniciar sesión.")
+          this.cerrarSession();
+        }
+        else {
+          this.showError("Ha ocurrido un error. " + error.message)
+        }
+      })
   }
 
   cerrarSession() {
