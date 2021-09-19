@@ -20,6 +20,7 @@ class Cancion(db.Model):
     albumes = db.relationship('Album', secondary = 'album_cancion', back_populates="canciones")
     compartidos = db.relationship('RecursoCompartido', backref='cancion')
     propia = db.Column(db.String(5), default='True')
+    comentarios = db.relationship('Comentario', backref='cancion')
 
 class Medio(enum.Enum):
    DISCO = 1
@@ -40,6 +41,7 @@ class Album(db.Model):
     canciones = db.relationship('Cancion', secondary = 'album_cancion', back_populates="albumes")
     compartidos = db.relationship('RecursoCompartido', backref='album')
     propio = db.Column(db.Integer)
+    comentarios = db.relationship('Comentario', backref='album')
 
 class RecursoCompartido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,6 +51,14 @@ class RecursoCompartido(db.Model):
     cancion_id = db.Column(db.Integer, db.ForeignKey("cancion.id"))
     album_id = db.Column(db.Integer, db.ForeignKey("album.id"))
 
+class Comentario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=False)
+    cancion_id = db.Column(db.Integer, db.ForeignKey("cancion.id"))
+    album_id = db.Column(db.Integer, db.ForeignKey("album.id"))
+    time = db.Column(db.DateTime, nullable=False)
+    texto = db.Column(db.String(1000), nullable=False)
+
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50))
@@ -56,6 +66,7 @@ class Usuario(db.Model):
     albumes = db.relationship('Album', cascade='all, delete, delete-orphan')
     compartidos = db.relationship('RecursoCompartido', backref='usuario_destino')
     canciones = db.relationship('Cancion', cascade='all, delete, delete-orphan')
+    comentarios = db.relationship('Comentario', backref='comentador')
 
 class EnumADiccionario(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -86,5 +97,11 @@ class RecursoCompartidoSchema(SQLAlchemyAutoSchema):
     tipo_recurso = EnumADiccionario(attribute=("tipo_recurso"))
     class Meta:
          model = RecursoCompartido
+         include_relationships = True
+         load_instance = True
+
+class ComentarioSchema(SQLAlchemyAutoSchema):
+    class Meta:
+         model = Comentario
          include_relationships = True
          load_instance = True
