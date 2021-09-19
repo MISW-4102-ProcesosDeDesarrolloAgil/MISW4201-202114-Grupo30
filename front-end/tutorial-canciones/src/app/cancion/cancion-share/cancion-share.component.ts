@@ -6,6 +6,8 @@ import { UsuarioService } from 'src/app/usuario/usuario.service';
 import { Cancion } from '../cancion';
 import { SharedResource } from '../sharedresource';
 import { CancionService } from '../cancion.service';
+import { NotificacionService } from 'src/app/app-home/notificacion.service';
+import { RecursoAlbum } from 'src/app/album/recurso_album';
 
 @Component({
   selector: 'app-cancion-share',
@@ -26,6 +28,7 @@ export class CancionShareComponent implements OnInit {
     public dialogRef: MatDialogRef<CancionShareComponent>,
     private router: ActivatedRoute,
     private routerPath: Router,
+    private notificacionService: NotificacionService,
     @Inject(MAT_DIALOG_DATA) public data: SharedResource) { }
 
   ngOnInit(): void {
@@ -38,9 +41,9 @@ export class CancionShareComponent implements OnInit {
   shareCancion() {
     if (this.data.users_names) {
     this.cancionService.compartirCancion(this.data.cancion_id, this.data.users_names, this.data.userId, this.data.token)
-      .subscribe(cancion => {
-        this.showSuccess(cancion)
-        this.routerPath.navigate([`/ionic/canciones/${this.userId}/${this.token}`])
+      .subscribe(recurso => {
+        this.showSuccess(this.cancion)
+        this.crearNotificacion();
       },
         error => {
           console.log(error)
@@ -65,6 +68,30 @@ export class CancionShareComponent implements OnInit {
         this.showError("El nombre de usuario es requerido.")
       }
 
+  }
+
+  crearNotificacion(){
+    this.notificacionService.crearNotificacion(this.data.userId, this.data.token, "COMPARTIR_CANCION", this.data.titulo, this.data.users_names)
+    .subscribe(notificacion => {         
+      this.routerPath.navigate([`/ionic/canciones/${this.userId}/${this.token}`])
+    },
+      error => {
+        if (error.error) {
+          this.showError(error.error)
+          this.routerPath.navigate([`/ionic/albumes/${this.userId}/${this.token}`])
+        }
+        else if (error.statusText === "UNAUTHORIZED") {
+          this.showWarning("Su sesión ha caducado, por favor vuelva a iniciar sesión.")
+          this.cerrarSession();
+        }
+        else if (error.statusText === "UNPROCESSABLE ENTITY") {
+          this.showError("No hemos podido identificarlo, por favor vuelva a iniciar sesión.")
+          this.cerrarSession();
+        }
+        else {
+          this.showError("Ha ocurrido un error. " + error.message)
+        }
+      })
   }
 
   cerrarSession() {
