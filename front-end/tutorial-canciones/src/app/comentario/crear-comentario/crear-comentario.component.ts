@@ -1,6 +1,7 @@
 import { Component, AfterViewInit, ViewChild, ElementRef, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { Comentario } from '../comentario';
 
 @Component({
   selector: 'app-crear-comentario',
@@ -19,12 +20,20 @@ export class CrearComentarioComponent implements OnInit {
   @Input()
   maxNumberOfCharacters = 1000;
 
+  @Input() userId: number;
+  @Input() token: string;
+  @Input() resourceId: number;
+  @Input() resourceType: string;
+
   numberOfCharacters = 0;
 
   constructor(private formBuilder: FormBuilder, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.createForm();
+    this.commentInfo = [];
+    this.commentInfo = this.getListaComentarios();
+    this.usercomment.emit(this.commentInfo);
   }
 
   createForm() {
@@ -33,20 +42,60 @@ export class CrearComentarioComponent implements OnInit {
     });
   }
 
+  getListaComentarios(): Array<object> {
+    //To do: implementar la lògica del servicio de backend correspondiente
+    if (this.commentInfo.length == 0)
+    {
+
+      let comentario = new Comentario( this.id++,
+        new Date(),
+        'Esta pieza me parece una obra de arte',
+        'Clayderman',
+        this.userId,
+        this.resourceId,
+        this.resourceType );
+
+        let comentario2 = new Comentario( this.id++,
+          new Date(),
+          'Cuando esta agrupacion musical estaba en sus mejores momentos',
+          'Jhina',
+          this.userId,
+          this.resourceId,
+          this.resourceType );
+
+          this.commentInfo.push(comentario);
+          this.commentInfo.push(comentario2);
+    }
+    return this.commentInfo;
+  }
+
+  crearComentario(comentario: Comentario): boolean{
+    //To do: implementar la lògica del servicio de backend correspondiente
+    this.commentInfo.push(comentario);
+    this.showSuccess();
+    return true;
+  }
+
+
   onSubmit() {
     this.submitted = true;
     if (!this.commentForm.invalid) {
-      this.commentInfo.push({
-        commentId : this.id++,
-        currentDate : new Date(),
-        commentTxt: this.commentForm.controls['comment'].value,
-        replyComment: [],
-        user_name: 'Clayderman'
-      });
-      this.usercomment.emit(this.commentInfo);
-      this.showSuccess();
-      this.commentForm.reset();
-      this.numberOfCharacters = 0;
+
+      let comentario = new Comentario(  this.id++,
+        new Date(),
+        this.commentForm.controls['comment'].value,
+        'Clayderman',
+        this.userId,
+        this.resourceId,
+        this.resourceType );
+
+      if (this.crearComentario(comentario))
+      {
+        this.commentInfo = this.getListaComentarios();
+        this.usercomment.emit(this.commentInfo);
+        this.commentForm.reset();
+        this.numberOfCharacters = 0;
+      }
     }
   }
 

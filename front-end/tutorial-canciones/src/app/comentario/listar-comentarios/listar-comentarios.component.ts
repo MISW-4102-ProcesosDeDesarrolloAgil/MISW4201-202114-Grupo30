@@ -27,12 +27,11 @@ export class ListarComentariosComponent implements OnInit, OnChanges {
   public commentIndex = 0;
   public reply: Array<Comentario> = [];
 
-  // @ViewChildren decorator to grab elements from the host view
-  /* The return type of ViewChildren is QueryList.
-  QueryList is just a fancy name for an object that stores
-  a list of items. What is special about this object is
-  when the state of the application changes Angular will
-  automatically update the object items for you. */
+  @Input() userId: number;
+  @Input() token: string;
+  @Input() resourceId: number;
+  @Input() resourceType: string;
+
   @ViewChildren (DatacontainerDirective) entry: QueryList<DatacontainerDirective>;
 
   constructor(private resolver: ComponentFactoryResolver) { }
