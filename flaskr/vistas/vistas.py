@@ -83,7 +83,6 @@ class VistaSignIn(Resource):
         token_de_acceso = create_access_token(identity = nuevo_usuario.id)
         return {"mensaje":"usuario creado exitosamente", "token":token_de_acceso}
 
-
     def put(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
         usuario.contrasena = request.json.get("contrasena",usuario.contrasena)
@@ -135,7 +134,7 @@ class VistaAlbumesUsuario(Resource):
                 ac = Album.query.filter(Album.id == c.album_id).first()
                 ac.propio = 0
                 propios.append(ac)
-        
+
         return [album_schema.dump(al) for al in propios]
 
 class VistaUsuario(Resource):
@@ -237,8 +236,11 @@ class VistaRecursosCompartidos(Resource):
             return "Error. El id de recurso no puede ser vacio", 400
 
         usuarios_destinos = usuario_destino.split(',')
-        print(usuarios_destinos)
         for ud in usuarios_destinos:
+            if usuario_o.nombre == ud:
+                db.session.rollback()
+                return "Error. No se puede compartir a usted mismo.", 400
+
             usuario_d = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario_d is None:
                 if tipo_recurso == "ALBUM":
@@ -295,17 +297,17 @@ class VistaCancionUsuariosCompartidos(Resource):
         return [usuario_schema.dump(u) for u in usuarios]
 
 class VistaNotificacionUsuario(Resource):
-    
+
     #@jwt_required()
     def post(self, id_usuario):
         tipo_notificacion = request.json["tipo"]
         nombre_recurso = request.json["nombre"]
         usuarios_destino = request.json["usuarios"]
-        
+
         if tipo_notificacion == None or nombre_recurso == None or usuarios_destino == None:
             db.session.rollback()
             return "Error. El tipo y el nombre de recurso no pueden ser vacio", 400
-        
+
         usuarioOrigen = Usuario.query.get_or_404(id_usuario)
         #armar mensaje
         if tipo_notificacion == TipoNotificacion.COMPARTIR_ALBUM.name:
@@ -316,14 +318,14 @@ class VistaNotificacionUsuario(Resource):
             mensaje = "El usuario {} le ha compartido {} el día {}";
 
         mensaje = mensaje.format(usuarioOrigen.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
-        
+
         usuarios = usuarios_destino.split(',')
         for ud in usuarios:
             usuario = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario is not None:
-                nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)       
+                nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)
                 usuario.notificaciones.append(nuevo_notificacion)
-                
+
         db.session.commit()
         return notificacion_schema.dump(nuevo_notificacion)
 
