@@ -86,7 +86,6 @@ class VistaSignIn(Resource):
         token_de_acceso = create_access_token(identity = nuevo_usuario.id)
         return {"mensaje":"usuario creado exitosamente", "token":token_de_acceso}
 
-
     def put(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
         usuario.contrasena = request.json.get("contrasena",usuario.contrasena)
@@ -242,6 +241,10 @@ class VistaRecursosCompartidos(Resource):
 
         usuarios_destinos = usuario_destino.split(',')
         for ud in usuarios_destinos:
+            if usuario_o.nombre == ud:
+                db.session.rollback()
+                return "Error. No se puede compartir a usted mismo.", 400
+
             usuario_d = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario_d is None:
                 if tipo_recurso == "ALBUM":
