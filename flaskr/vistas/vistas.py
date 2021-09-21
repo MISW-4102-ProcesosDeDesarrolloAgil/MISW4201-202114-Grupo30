@@ -1,16 +1,22 @@
 from datetime import datetime
 from flask import request
 from flask.json import JSONEncoder
-from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, Comentario, ComentarioSchema
+from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, Comentario, ComentarioSchema, Notificacion, TipoNotificacion, NotificacionSchema
+from marshmallow.fields import Date
+from sqlalchemy.orm import query
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+import datetime
+import pytz
 
 cancion_schema = CancionSchema()
 usuario_schema = UsuarioSchema()
 album_schema = AlbumSchema()
 recurso_compartido_schema = RecursoCompartidoSchema()
 comentario_schema = ComentarioSchema()
+notificacion_schema = NotificacionSchema()
+
 
 class VistaCancionesUsuario(Resource):
 
@@ -363,3 +369,41 @@ class VistaComentariosAlbum(Resource):
         return JSONEncoder().encode(response)
 
 
+class VistaNotificacionUsuario(Resource):
+
+    #@jwt_required()
+    def post(self, id_usuario):
+        tipo_notificacion = request.json["tipo"]
+        nombre_recurso = request.json["nombre"]
+        usuarios_destino = request.json["usuarios"]
+
+        if tipo_notificacion == None or nombre_recurso == None or usuarios_destino == None:
+            db.session.rollback()
+            return "Error. El tipo y el nombre de recurso no pueden ser vacio", 400
+
+        usuarioOrigen = Usuario.query.get_or_404(id_usuario)
+        #armar mensaje
+        if tipo_notificacion == TipoNotificacion.COMPARTIR_ALBUM.name:
+            mensaje = "El usuario {} le ha compartido el álbum {} el día {}";
+        elif tipo_notificacion == TipoNotificacion.COMPARTIR_CANCION.name:
+            mensaje = "El usuario {} le ha compartido la canción {} el día {}";
+        else:
+            mensaje = "El usuario {} le ha compartido {} el día {}";
+
+        mensaje = mensaje.format(usuarioOrigen.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
+
+        usuarios = usuarios_destino.split(',')
+        for ud in usuarios:
+            usuario = Usuario.query.filter(Usuario.nombre == ud).first()
+            if usuario is not None:
+                nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)
+                usuario.notificaciones.append(nuevo_notificacion)
+
+        db.session.commit()
+        return notificacion_schema.dump(nuevo_notificacion)
+
+    # @jwt_required()
+    def get(self, id_usuario):
+        usuario = Usuario.query.get_or_404(id_usuario)
+        notificaciones = sorted(usuario.notificaciones, key=lambda x: x.id, reverse=True);
+        return [notificacion_schema.dump(ca) for ca in notificaciones]
