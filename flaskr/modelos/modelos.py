@@ -66,7 +66,7 @@ class Usuario(db.Model):
     albumes = db.relationship('Album', cascade='all, delete, delete-orphan')
     compartidos = db.relationship('RecursoCompartido', backref='usuario_destino')
     canciones = db.relationship('Cancion', cascade='all, delete, delete-orphan')
-    comentarios = db.relationship('Comentario', backref='comentador')
+    comentarios = db.relationship('Comentario', backref='comentador', lazy='subquery')
 
 class EnumADiccionario(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):

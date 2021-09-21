@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import request
-from sqlalchemy.orm import query
+from flask.json import JSONEncoder
 from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, Comentario, ComentarioSchema
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
@@ -340,8 +340,26 @@ class VistaComentarios(Resource):
 class VistaComentario(Resource):
     def get(self, id_comentario):
         return comentario_schema.dump(Comentario.query.get_or_404(id_comentario))
-
 class VistaComentariosAlbum(Resource):
     def get(self, id_album):
-        comentarios = Comentario.query.filter(Comentario.album_id == id_album).order_by(Comentario.time).all()
-        return [comentario_schema.dump(c) for c in comentarios]
+
+        comentarios = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
+            join(Comentario, Comentario.usuario == Usuario.id). \
+            filter(Comentario.album_id == id_album). \
+            order_by(Comentario.time).all()
+
+        response = []
+        for c in comentarios:
+            r = {
+                'id': c['id'],
+                'cancion_id': c['cancion_id'],
+                'album_id': c['album_id'],
+                'time': c['time'],
+                'texto': c['texto'],
+                'usuario': c['nombre']
+            }
+            response.append(r)
+
+        return JSONEncoder().encode(response)
+
+
