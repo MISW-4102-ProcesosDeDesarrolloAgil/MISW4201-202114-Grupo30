@@ -25,7 +25,6 @@ export class ComentarioComponent implements OnInit {
   receiveComment($event: Array<Comentario> = []) {
     this.comments = $event;
     this.count = this.comments.length;
-    console.log(this.comments.length);
   }
 
   recieveCount($event: Array<Comentario> = []) {

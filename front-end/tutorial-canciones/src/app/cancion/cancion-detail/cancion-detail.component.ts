@@ -15,6 +15,7 @@ export class CancionDetailComponent implements OnInit {
 
   @Input() cancion: Cancion;
   @Output() deleteCancion = new EventEmitter();
+  @Output() mostrarComentarios = new EventEmitter();
 
   userId: number;
   token: string;

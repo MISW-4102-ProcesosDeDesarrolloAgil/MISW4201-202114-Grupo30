@@ -1,7 +1,10 @@
 import { Component, AfterViewInit, ViewChild, ElementRef, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { UsuarioService } from 'src/app/usuario/usuario.service';
 import { Comentario } from '../comentario';
+import { ComentarioService } from '../comentario.service';
 
 @Component({
   selector: 'app-crear-comentario',
@@ -27,13 +30,16 @@ export class CrearComentarioComponent implements OnInit {
 
   numberOfCharacters = 0;
 
-  constructor(private formBuilder: FormBuilder, private toastr: ToastrService) { }
+  constructor(private formBuilder: FormBuilder,
+    private toastr: ToastrService,
+    private usuarioServicio: UsuarioService,
+    private routerPath: Router,
+    private comentarioService: ComentarioService) { }
 
   ngOnInit() {
     this.createForm();
     this.commentInfo = [];
-    this.commentInfo = this.getListaComentarios();
-    this.usercomment.emit(this.commentInfo);
+    this.getListaComentarios();
   }
 
   createForm() {
@@ -42,38 +48,47 @@ export class CrearComentarioComponent implements OnInit {
     });
   }
 
-  getListaComentarios(): Array<object> {
-    //To do: implementar la lògica del servicio de backend correspondiente
-    if (this.commentInfo.length == 0)
-    {
-
-      let comentario = new Comentario( this.id++,
-        new Date(),
-        'Esta pieza me parece una obra de arte',
-        'Clayderman',
-        this.userId,
-        this.resourceId,
-        this.resourceType );
-
-        let comentario2 = new Comentario( this.id++,
-          new Date(),
-          'Cuando esta agrupacion musical estaba en sus mejores momentos',
-          'Jhina',
-          this.userId,
-          this.resourceId,
-          this.resourceType );
-
-          this.commentInfo.push(comentario);
-          this.commentInfo.push(comentario2);
-    }
-    return this.commentInfo;
+  getListaComentarios() {
+      this.comentarioService.getComentarios(this.resourceId, this.resourceType)
+      .subscribe(comentarios => {
+        this.commentInfo = comentarios
+        this.usercomment.emit(this.commentInfo);
+      },
+      error => {
+        console.log(error)
+      })
   }
 
   crearComentario(comentario: Comentario): boolean{
-    //To do: implementar la lògica del servicio de backend correspondiente
-    this.commentInfo.push(comentario);
-    this.showSuccess();
-    return true;
+    if (comentario.texto) {
+      this.comentarioService.comentarRecurso(comentario.usuario, comentario.texto, this.resourceId, this.resourceType, this.token)
+        .subscribe(recurso => {
+          this.commentInfo.push(comentario);
+          this.showSuccess(comentario)
+          return true;
+        },
+          error => {
+            console.log(error)
+            if (error.error) {
+              this.showError(error.error + "")
+            }
+            else if (error.statusText === "UNAUTHORIZED") {
+              this.showWarning("Su sesión ha caducado, por favor vuelva a iniciar sesión.")
+              this.cerrarSession();
+            }
+            else if (error.statusText === "UNPROCESSABLE ENTITY") {
+              this.showError("No hemos podido identificarlo, por favor vuelva a iniciar sesión.")
+              this.cerrarSession();
+            }
+            else {
+              this.showError("Ha ocurrido un error. " + error.message)
+            }
+          })
+        }
+        else {
+          this.showError("El texto del comentario es requerido.")
+        }
+    return false;
   }
 
 
@@ -81,18 +96,17 @@ export class CrearComentarioComponent implements OnInit {
     this.submitted = true;
     if (!this.commentForm.invalid) {
 
-      let comentario = new Comentario(  this.id++,
-        new Date(),
-        this.commentForm.controls['comment'].value,
-        'Clayderman',
+      let comentario = new Comentario( this.id++,
         this.userId,
+        this.commentForm.controls['comment'].value,
         this.resourceId,
-        this.resourceType );
+        this.resourceId,
+        '',
+        new Date() );
 
       if (this.crearComentario(comentario))
       {
-        this.commentInfo = this.getListaComentarios();
-        this.usercomment.emit(this.commentInfo);
+        this.getListaComentarios();
         this.commentForm.reset();
         this.numberOfCharacters = 0;
       }
@@ -118,9 +132,13 @@ export class CrearComentarioComponent implements OnInit {
     this.toastr.warning(warning, "Error de autenticación")
   }
 
-  showSuccess() {
+  showSuccess(comentario: Comentario) {
     this.toastr.success(`El comentario se agregó correctamente.`, "Creación exitosa");
   }
 
+  cerrarSession() {
+    this.usuarioServicio.cerrarSession();
+    this.routerPath.navigate(['/auth']);
+  }
 
 }

@@ -10,8 +10,8 @@
       </mat-card-subtitle>
       <div *ngFor="let post of postComment; let i = index;">
             <mat-card>
-              <mat-card-subtitle> <mat-icon>person</mat-icon> {{post.user_name}} -  {{post.currentDate | date: 'dd/MM/yyyy hh:m:ss'}}</mat-card-subtitle>
-              <mat-card-content>{{post.commentTxt}}</mat-card-content>
+              <mat-card-subtitle> <mat-icon>person</mat-icon> {{post.nombre_usuario}} -  {{post.time | date: 'dd/MM/yyyy hh:m:ss'}}</mat-card-subtitle>
+              <mat-card-content>{{post.texto}}</mat-card-content>
               <mat-card-footer></mat-card-footer>
             </mat-card>
             <br/>

@@ -1,11 +1,12 @@
+from datetime import datetime
 from flask import request
 from marshmallow.fields import Date
 from sqlalchemy.orm import query
-from flaskr.modelos.modelos import Notificacion, TipoNotificacion, db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, NotificacionSchema
+from flaskr.modelos.modelos import Notificacion, TipoNotificacion, db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, NotificacionSchema, Comentario, ComentarioSchema
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
-import datetime
+from datetime import datetime
 import pytz
 
 cancion_schema = CancionSchema()
@@ -13,7 +14,7 @@ usuario_schema = UsuarioSchema()
 album_schema = AlbumSchema()
 recurso_compartido_schema = RecursoCompartidoSchema()
 notificacion_schema = NotificacionSchema()
-
+comentario_schema = ComentarioSchema()
 
 class VistaCancionesUsuario(Resource):
 
@@ -135,12 +136,13 @@ class VistaAlbumesUsuario(Resource):
                 ac = Album.query.filter(Album.id == c.album_id).first()
                 ac.propio = 0
                 propios.append(ac)
-        
+
         return [album_schema.dump(al) for al in propios]
 
 class VistaUsuario(Resource):
     def get(self, id_usuario):
         return usuario_schema.dump(Usuario.query.get_or_404(id_usuario))
+
 class VistaCancionesAlbum(Resource):
 
     def post(self, id_album):
@@ -237,7 +239,6 @@ class VistaRecursosCompartidos(Resource):
             return "Error. El id de recurso no puede ser vacio", 400
 
         usuarios_destinos = usuario_destino.split(',')
-        print(usuarios_destinos)
         for ud in usuarios_destinos:
             usuario_d = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario_d is None:
@@ -332,3 +333,63 @@ class VistaNotificacionUsuario(Resource):
         usuario = Usuario.query.get_or_404(id_usuario)
         notificaciones = sorted(usuario.notificaciones, key=lambda x: x.id, reverse=True);
         return [notificacion_schema.dump(ca) for ca in notificaciones]
+
+class VistaComentarios(Resource):
+
+    # @jwt_required()
+    def post(self):
+        usuario = request.json["usuario"]
+        texto = request.json["texto"]
+        recurso_id = ''
+        if 'album_id' in request.json:
+            recurso_id = request.json["album_id"]
+            tipo_recurso = "ALBUM"
+        else:
+            recurso_id = request.json["cancion_id"]
+            tipo_recurso = "CANCION"
+
+        if usuario == None or type(usuario) != int:
+            db.session.rollback()
+            return "Error. El id de usuario no puede ser vacio o es no es numerico", 400
+
+        if Usuario.query.filter(Usuario.id == usuario).first() is None:
+            db.session.rollback()
+            return "El usuario origen no existe", 400
+
+        if texto is None or len(texto) > 1000:
+            db.session.rollback()
+            return "El texto no puede ser vacio o el texto excede los 1000 caracteres.", 400
+
+        comentario = Comentario(
+            time=datetime.now(tz=None),
+            usuario=usuario,
+            texto=texto,
+        )
+
+        if tipo_recurso == "ALBUM":
+            comentario.album_id = recurso_id
+        else:
+            comentario.cancion_id = recurso_id
+
+        try:
+            db.session.add(comentario)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return "No se puedo guardar el comentario", 400
+
+        return comentario_schema.dump(comentario)
+
+class VistaComentario(Resource):
+    def get(self, id_comentario):
+        return comentario_schema.dump(Comentario.query.get_or_404(id_comentario))
+
+class VistaComentariosAlbum(Resource):
+    def get(self, id_album):
+        comentarios = Comentario.query.filter(Comentario.album_id == id_album).order_by(Comentario.time).all()
+        return [comentario_schema.dump(c) for c in comentarios]
+
+class VistaComentariosCancion(Resource):
+    def get(self, id_cancion):
+        comentarios = Comentario.query.filter(Comentario.cancion_id == id_cancion).order_by(Comentario.time).all()
+        return [comentario_schema.dump(c) for c in comentarios] 
