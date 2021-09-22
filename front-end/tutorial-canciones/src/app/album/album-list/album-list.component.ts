@@ -73,7 +73,7 @@ export class AlbumListComponent implements OnInit {
   }
 
   onSelect(a: Album, index: number){
-    if (a.propio === 1) {
+    //if (a.propio === 1) {
       this.indiceSeleccionado = index
       this.albumSeleccionado = a
       this.albumService.getCancionesAlbum(a.id, this.token)
@@ -84,7 +84,7 @@ export class AlbumListComponent implements OnInit {
       error =>{
         this.showError("Ha ocurrido un error, " + error.message)
       })
-    }
+    //}
   }
 
   getInterpretes(canciones: Array<Cancion>): Array<string>{

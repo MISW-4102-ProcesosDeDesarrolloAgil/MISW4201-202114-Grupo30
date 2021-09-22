@@ -71,7 +71,7 @@ export class CancionListComponent implements OnInit {
 
   onSelect(c: Cancion, index: number){
     console.log("Indice: " + index)
-    if (c.propia === "True") {
+    //if (c.propia === "True") {
       this.indiceSeleccionado = index
       this.cancionSeleccionada = c
       this.cancionService.getAlbumesCancion(c.id)
@@ -81,7 +81,7 @@ export class CancionListComponent implements OnInit {
       error => {
         this.showError(`Ha ocurrido un error: ${error.message}`)
       })
-    }
+    //}
 
   }
 
