@@ -34,7 +34,7 @@ class TipoRecurso(enum.Enum):
     CANCION = 2
 
 class TipoNotificacion(enum.Enum):
-   COMPARTIR_ALBUM = 1 
+   COMPARTIR_ALBUM = 1
    COMPARTIR_CANCION = 2
    COMENTAR = 3
    CALIFICAR = 4
@@ -74,6 +74,7 @@ class Usuario(db.Model):
     albumes = db.relationship('Album', cascade='all, delete, delete-orphan')
     compartidos = db.relationship('RecursoCompartido', backref='usuario_destino')
     canciones = db.relationship('Cancion', cascade='all, delete, delete-orphan')
+    comentarios = db.relationship('Comentario', backref='comentador', lazy='subquery')
     notificaciones = db.relationship('Notificacion', cascade='all, delete, delete-orphan')
 
 class Notificacion(db.Model):
@@ -82,7 +83,6 @@ class Notificacion(db.Model):
     mensaje = db.Column(db.String(512))
     tipo_notificacion = db.Column(db.Enum(TipoNotificacion))
     usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
-    #comentarios = db.relationship('Comentario', backref='comentador')
 
 class EnumADiccionario(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -116,6 +116,12 @@ class RecursoCompartidoSchema(SQLAlchemyAutoSchema):
          include_relationships = True
          load_instance = True
 
+class ComentarioSchema(SQLAlchemyAutoSchema):
+    class Meta:
+         model = Comentario
+         include_relationships = True
+         load_instance = True
+
 class NotificacionSchema(SQLAlchemyAutoSchema):
     tipo_notificacion = EnumADiccionario(attribute=("tipo_notificacion"))
     class Meta:
@@ -123,9 +129,6 @@ class NotificacionSchema(SQLAlchemyAutoSchema):
          include_relationships = True
          load_instance = True
 
-class ComentarioSchema(SQLAlchemyAutoSchema):
+class ComentarioRespuestaSchema(SQLAlchemyAutoSchema):
     class Meta:
-         model = Comentario 
-         include_relationships = True
-         load_instance = True
-
+        fields = ("id", "cancion_id", "album_id", "time", "texto", "nombre_usuario")

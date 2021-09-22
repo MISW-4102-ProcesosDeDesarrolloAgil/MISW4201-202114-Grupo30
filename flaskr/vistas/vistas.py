@@ -1,8 +1,10 @@
 from datetime import datetime
+import json
 from flask import request
+from flask.json import JSONEncoder
+from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, Comentario, ComentarioSchema, Notificacion, TipoNotificacion, NotificacionSchema, ComentarioRespuestaSchema
 from marshmallow.fields import Date
 from sqlalchemy.orm import query
-from flaskr.modelos.modelos import Notificacion, TipoNotificacion, db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, NotificacionSchema, Comentario, ComentarioSchema
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
@@ -15,6 +17,7 @@ album_schema = AlbumSchema()
 recurso_compartido_schema = RecursoCompartidoSchema()
 notificacion_schema = NotificacionSchema()
 comentario_schema = ComentarioSchema()
+comentario_respuesta_schema = ComentarioRespuestaSchema()
 
 class VistaCancionesUsuario(Resource):
 
@@ -83,7 +86,6 @@ class VistaSignIn(Resource):
         db.session.commit()
         token_de_acceso = create_access_token(identity = nuevo_usuario.id)
         return {"mensaje":"usuario creado exitosamente", "token":token_de_acceso}
-
 
     def put(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
@@ -240,6 +242,10 @@ class VistaRecursosCompartidos(Resource):
 
         usuarios_destinos = usuario_destino.split(',')
         for ud in usuarios_destinos:
+            if usuario_o.nombre == ud:
+                db.session.rollback()
+                return "Error. No se puede compartir a usted mismo.", 400
+
             usuario_d = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario_d is None:
                 if tipo_recurso == "ALBUM":
@@ -295,45 +301,6 @@ class VistaCancionUsuariosCompartidos(Resource):
             usuarios.append(u)
         return [usuario_schema.dump(u) for u in usuarios]
 
-class VistaNotificacionUsuario(Resource):
-    
-    #@jwt_required()
-    def post(self, id_usuario):
-        tipo_notificacion = request.json["tipo"]
-        nombre_recurso = request.json["nombre"]
-        usuarios_destino = request.json["usuarios"]
-        
-        if tipo_notificacion == None or nombre_recurso == None or usuarios_destino == None:
-            db.session.rollback()
-            return "Error. El tipo y el nombre de recurso no pueden ser vacio", 400
-        
-        usuarioOrigen = Usuario.query.get_or_404(id_usuario)
-        #armar mensaje
-        if tipo_notificacion == TipoNotificacion.COMPARTIR_ALBUM.name:
-            mensaje = "El usuario {} le ha compartido el álbum {} el día {}";
-        elif tipo_notificacion == TipoNotificacion.COMPARTIR_CANCION.name:
-            mensaje = "El usuario {} le ha compartido la canción {} el día {}";
-        else:
-            mensaje = "El usuario {} le ha compartido {} el día {}";
-
-        mensaje = mensaje.format(usuarioOrigen.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
-        
-        usuarios = usuarios_destino.split(',')
-        for ud in usuarios:
-            usuario = Usuario.query.filter(Usuario.nombre == ud).first()
-            if usuario is not None:
-                nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)       
-                usuario.notificaciones.append(nuevo_notificacion)
-                
-        db.session.commit()
-        return notificacion_schema.dump(nuevo_notificacion)
-
-    # @jwt_required()
-    def get(self, id_usuario):
-        usuario = Usuario.query.get_or_404(id_usuario)
-        notificaciones = sorted(usuario.notificaciones, key=lambda x: x.id, reverse=True);
-        return [notificacion_schema.dump(ca) for ca in notificaciones]
-
 class VistaComentarios(Resource):
 
     # @jwt_required()
@@ -386,10 +353,83 @@ class VistaComentario(Resource):
 
 class VistaComentariosAlbum(Resource):
     def get(self, id_album):
-        comentarios = Comentario.query.filter(Comentario.album_id == id_album).order_by(Comentario.time).all()
-        return [comentario_schema.dump(c) for c in comentarios]
+
+        comentarios = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
+            join(Comentario, Comentario.usuario == Usuario.id). \
+            filter(Comentario.album_id == id_album). \
+            order_by(Comentario.time).all()
+
+        response = []
+        for c in comentarios:
+            r = {
+                'id': c['id'],
+                'cancion_id': c['cancion_id'],
+                'album_id': c['album_id'],
+                'time': c['time'],
+                'texto': c['texto'],
+                'nombre_usuario': c['nombre']
+            }
+            response.append(r)
+
+        return [comentario_respuesta_schema.dump(cr) for cr in response]
 
 class VistaComentariosCancion(Resource):
     def get(self, id_cancion):
-        comentarios = Comentario.query.filter(Comentario.cancion_id == id_cancion).order_by(Comentario.time).all()
-        return [comentario_schema.dump(c) for c in comentarios] 
+
+        comentarios = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
+            join(Comentario, Comentario.usuario == Usuario.id). \
+            filter(Comentario.cancion_id == id_cancion). \
+            order_by(Comentario.time).all()
+
+        response = []
+        for c in comentarios:
+            r = {
+                "id": c['id'],
+                "cancion_id": c['cancion_id'],
+                'album_id': c['album_id'],
+                'time': c['time'].strftime("%m/%d/%Y, %H:%M:%S"),
+                'texto': c['texto'],
+                'nombre_usuario': c['nombre']
+            }
+            response.append(r)
+
+        return [comentario_respuesta_schema.dump(cr) for cr in response]
+
+class VistaNotificacionUsuario(Resource):
+
+    #@jwt_required()
+    def post(self, id_usuario):
+        tipo_notificacion = request.json["tipo"]
+        nombre_recurso = request.json["nombre"]
+        usuarios_destino = request.json["usuarios"]
+
+        if tipo_notificacion == None or nombre_recurso == None or usuarios_destino == None:
+            db.session.rollback()
+            return "Error. El tipo y el nombre de recurso no pueden ser vacio", 400
+
+        usuarioOrigen = Usuario.query.get_or_404(id_usuario)
+        #armar mensaje
+        if tipo_notificacion == TipoNotificacion.COMPARTIR_ALBUM.name:
+            mensaje = "El usuario {} le ha compartido el álbum {} el día {}";
+        elif tipo_notificacion == TipoNotificacion.COMPARTIR_CANCION.name:
+            mensaje = "El usuario {} le ha compartido la canción {} el día {}";
+        else:
+            mensaje = "El usuario {} le ha compartido {} el día {}";
+
+        mensaje = mensaje.format(usuarioOrigen.nombre, nombre_recurso, datetime.datetime.now(pytz.timezone('Etc/GMT+5')));
+
+        usuarios = usuarios_destino.split(',')
+        for ud in usuarios:
+            usuario = Usuario.query.filter(Usuario.nombre == ud).first()
+            if usuario is not None:
+                nuevo_notificacion = Notificacion(mensaje=mensaje, tipo_notificacion=tipo_notificacion)
+                usuario.notificaciones.append(nuevo_notificacion)
+
+        db.session.commit()
+        return notificacion_schema.dump(nuevo_notificacion)
+
+    # @jwt_required()
+    def get(self, id_usuario):
+        usuario = Usuario.query.get_or_404(id_usuario)
+        notificaciones = sorted(usuario.notificaciones, key=lambda x: x.id, reverse=True);
+        return [notificacion_schema.dump(ca) for ca in notificaciones]

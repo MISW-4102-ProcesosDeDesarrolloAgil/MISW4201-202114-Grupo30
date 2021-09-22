@@ -37,11 +37,15 @@ export class ListarComentariosComponent implements OnInit, OnChanges {
   constructor(private resolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
+    console.log(this.resourceId);
   }
 
 
   ngOnChanges() {
     if (this.postComment !== undefined) {
+      /*console.log("Recibo comentarios")
+      console.log(this.postComment)
+      console.log(this.resourceId)*/
     }
   }
 

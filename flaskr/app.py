@@ -38,6 +38,6 @@ api.add_resource(VistaComentariosCancion, '/comentario/cancion/<int:id_cancion>'
 
 jwt = JWTManager(app)
 
-# import logging
-# logging.basicConfig()
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)

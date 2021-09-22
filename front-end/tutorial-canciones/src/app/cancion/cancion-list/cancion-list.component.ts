@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Cancion } from '../cancion';
 import { CancionService } from '../cancion.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { UsuarioService } from 'src/app/usuario/usuario.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CancionShareComponent } from '../cancion-share/cancion-share.component';
+import { ComentarioService } from 'src/app/comentario/comentario.service';
 
 @Component({
   selector: 'app-cancion-list',
@@ -14,13 +15,16 @@ import { CancionShareComponent } from '../cancion-share/cancion-share.component'
 })
 export class CancionListComponent implements OnInit {
 
+  @Output() usercomment = new EventEmitter();
+
   constructor(
     private cancionService: CancionService,
     private routerPath: Router,
     private router: ActivatedRoute,
     private toastr: ToastrService,
     private usuarioServicio: UsuarioService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private comentarioService: ComentarioService
   ) { }
 
   userId: number
@@ -69,6 +73,18 @@ export class CancionListComponent implements OnInit {
     })
   }
 
+  getListaComentarios(resourceId: number) {
+    this.comentarioService.getComentarios(resourceId, 'CANCION')
+    .subscribe(comentarios => {
+      console.log("Obteniendo comentarios")
+      this.usercomment.emit(comentarios);
+  },
+    error => {
+      console.log(error)
+    })
+}
+
+
   onSelect(c: Cancion, index: number){
     console.log("Indice: " + index)
     if (c.propia === "True") {
@@ -81,6 +97,11 @@ export class CancionListComponent implements OnInit {
       error => {
         this.showError(`Ha ocurrido un error: ${error.message}`)
       })
+
+      /*this.getListaComentarios(c.id);*/
+
+
+
     }
 
   }

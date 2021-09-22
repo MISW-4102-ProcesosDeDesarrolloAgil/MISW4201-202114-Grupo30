@@ -1,6 +1,7 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ComentarioComponent } from 'src/app/comentario/comentario.component';
 import { Usuario } from 'src/app/usuario/usuario';
 import { Cancion } from '../cancion';
 import { CancionShareComponent } from '../cancion-share/cancion-share.component';
@@ -11,7 +12,11 @@ import { CancionService } from '../cancion.service';
   templateUrl: './cancion-detail.component.html',
   styleUrls: ['./cancion-detail.component.css']
 })
+
+
 export class CancionDetailComponent implements OnInit {
+
+  @ViewChild (ComentarioComponent) comentarioComponent: ComentarioComponent;
 
   @Input() cancion: Cancion;
   @Output() deleteCancion = new EventEmitter();
@@ -31,14 +36,19 @@ export class CancionDetailComponent implements OnInit {
     public dialog: MatDialog
   ) { }
 
+  ngAfterViewInit() {
+  }
+
   ngOnInit() {
     this.userId = parseInt(this.router.snapshot.params.userId)
     this.token = this.router.snapshot.params.userToken
-
   }
 
   ngOnChanges() {
     this.getUsuariosCompartidos()
+    //this.comentarioComponent.resourceId = this.cancion.id;
+    //this.comentarioComponent.resourceType = 'CANCION';
+    //console.log(this.cancion);
   }
 
   eliminarCancion(){

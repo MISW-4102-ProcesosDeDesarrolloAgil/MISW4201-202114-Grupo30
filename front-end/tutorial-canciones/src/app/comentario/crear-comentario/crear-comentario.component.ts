@@ -63,7 +63,8 @@ export class CrearComentarioComponent implements OnInit {
     if (comentario.texto) {
       this.comentarioService.comentarRecurso(comentario.usuario, comentario.texto, this.resourceId, this.resourceType, this.token)
         .subscribe(recurso => {
-          this.commentInfo.push(comentario);
+          //this.commentInfo.push(comentario);
+          this.getListaComentarios()
           this.showSuccess(comentario)
           return true;
         },
