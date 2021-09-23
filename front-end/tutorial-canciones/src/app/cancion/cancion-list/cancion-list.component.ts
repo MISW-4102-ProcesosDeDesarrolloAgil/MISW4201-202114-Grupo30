@@ -58,7 +58,6 @@ export class CancionListComponent implements OnInit {
       }
     },
     error => {
-      console.log(error)
       if(error.statusText === "UNAUTHORIZED"){
         this.showWarning("Su sesión ha caducado, por favor vuelva a iniciar sesión.")
         this.cerrarSession();
@@ -76,7 +75,6 @@ export class CancionListComponent implements OnInit {
   getListaComentarios(resourceId: number) {
     this.comentarioService.getComentarios(resourceId, 'CANCION')
     .subscribe(comentarios => {
-      console.log("Obteniendo comentarios")
       this.usercomment.emit(comentarios);
   },
     error => {
@@ -86,7 +84,6 @@ export class CancionListComponent implements OnInit {
 
 
   onSelect(c: Cancion, index: number){
-    console.log("Indice: " + index)
     if (c.propia === "True") {
       this.indiceSeleccionado = index
       this.cancionSeleccionada = c

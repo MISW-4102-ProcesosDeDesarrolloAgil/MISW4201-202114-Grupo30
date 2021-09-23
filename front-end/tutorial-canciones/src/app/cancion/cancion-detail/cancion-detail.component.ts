@@ -16,7 +16,7 @@ import { CancionService } from '../cancion.service';
 
 export class CancionDetailComponent implements OnInit {
 
-  @ViewChild (ComentarioComponent) comentarioComponent: ComentarioComponent;
+  //@ViewChild (ComentarioComponent) comentarioComponent: ComentarioComponent;
 
   @Input() cancion: Cancion;
   @Output() deleteCancion = new EventEmitter();

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, OnChanges, EventEmitter,
   Directive, ViewContainerRef, ViewChildren, QueryList, ComponentFactoryResolver, AfterContentInit} from '@angular/core';
 import { Comentario } from '../comentario';
+import { ComentarioService } from '../comentario.service';
 import { ResponderComentarioComponent } from '../responder-comentario/responder-comentario.component';
 
 @Directive({
@@ -32,22 +33,31 @@ export class ListarComentariosComponent implements OnInit, OnChanges {
   @Input() resourceId: number;
   @Input() resourceType: string;
 
+  @Output() usercomment = new EventEmitter();
+
   @ViewChildren (DatacontainerDirective) entry: QueryList<DatacontainerDirective>;
 
-  constructor(private resolver: ComponentFactoryResolver) { }
+  constructor(private resolver: ComponentFactoryResolver, private comentarioService: ComentarioService) { }
 
   ngOnInit() {
-    console.log(this.resourceId);
   }
 
 
   ngOnChanges() {
-    if (this.postComment !== undefined) {
-      /*console.log("Recibo comentarios")
-      console.log(this.postComment)
-      console.log(this.resourceId)*/
-    }
+     this.getListaComentarios();
   }
+
+  getListaComentarios() {
+    this.comentarioService.getComentarios(this.resourceId, this.resourceType)
+    .subscribe(comentarios => {
+      this.postComment = comentarios
+      this.usercomment.emit(this.postComment);
+    },
+    error => {
+      console.log(error)
+    })
+}
+
 
   removeComment(no: number) {
     this.postComment.splice(no, 1);

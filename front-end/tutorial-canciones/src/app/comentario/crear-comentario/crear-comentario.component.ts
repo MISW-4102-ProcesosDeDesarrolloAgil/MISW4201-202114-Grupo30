@@ -63,10 +63,10 @@ export class CrearComentarioComponent implements OnInit {
     if (comentario.texto) {
       this.comentarioService.comentarRecurso(comentario.usuario, comentario.texto, this.resourceId, this.resourceType, this.token)
         .subscribe(recurso => {
-          //this.commentInfo.push(comentario);
-          this.getListaComentarios()
           this.showSuccess(comentario)
-          return true;
+          this.commentForm.reset();
+          this.numberOfCharacters = 0;
+          this.getListaComentarios();
         },
           error => {
             console.log(error)
@@ -105,12 +105,7 @@ export class CrearComentarioComponent implements OnInit {
         '',
         new Date() );
 
-      if (this.crearComentario(comentario))
-      {
-        this.getListaComentarios();
-        this.commentForm.reset();
-        this.numberOfCharacters = 0;
-      }
+      this.crearComentario(comentario);
     }
   }
 
