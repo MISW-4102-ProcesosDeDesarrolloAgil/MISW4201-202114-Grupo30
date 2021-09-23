@@ -212,15 +212,15 @@ class VistaRecursosCompartidos(Resource):
 
         check = self.check_data_recurso_compartido(usuario_destino, usuario_origen_id, tipo_recurso, id_recurso)
 
-        if check is str:
+        if "Error." in check:
             return check, 400
 
-        usuarios_destinos = usuario_destino.split(',')
         usuario_o = Usuario.query.filter(Usuario.id == usuario_origen_id).first()
         if usuario_o is None:
             db.session.rollback()
             return "El usuario origen no existe", 400
 
+        usuarios_destinos = usuario_destino.split(',')
         for ud in usuarios_destinos:
             if usuario_o.nombre == ud:
                 db.session.rollback()
@@ -301,9 +301,13 @@ class VistaComentarios(Resource):
             recurso_id = request.json["cancion_id"]
             tipo_recurso = "CANCION"
 
+        if recurso_id == None or type(recurso_id) != int:
+            db.session.rollback()
+            return "Error. El id de album o el id de cancion esta vacio o no es numerico", 400
+
         if usuario == None or type(usuario) != int:
             db.session.rollback()
-            return "Error. El id de usuario no puede ser vacio o es no es numerico", 400
+            return "Error. El id de usuario no puede ser vacio o no es numerico", 400
 
         if Usuario.query.filter(Usuario.id == usuario).first() is None:
             db.session.rollback()

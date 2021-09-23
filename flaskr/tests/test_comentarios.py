@@ -46,20 +46,6 @@ class ComentarioTestCase(BaseTestClass):
                 ROUTE_POST,
                 data=json.dumps(dict(
                     usuario=1,
-                    cancion_id=None,
-                    texto=self.generate_text()
-                )),
-                content_type='application/json', follow_redirects=True
-            )
-            self.assertEqual(
-                result.status_code,
-                400
-            )
-
-            result = client.post(
-                ROUTE_POST,
-                data=json.dumps(dict(
-                    usuario=1,
                     album_id=None,
                     texto=self.generate_text()
                 )),
