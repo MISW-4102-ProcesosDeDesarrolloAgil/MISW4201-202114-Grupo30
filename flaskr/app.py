@@ -3,12 +3,12 @@ from flask_restful import Api
 from flaskr.modelos.modelos import db
 from flaskr.vistas.vistas import VistaCancionesUsuario, VistaCancion, \
                                  VistaNotificacionUsuario, VistaComentario, \
-                                 VistaComentarios, VistaComentariosAlbum, \
+                                 VistaComentarios, VistaComentariosPorTipo, \
                                  VistaSignIn, VistaAlbum, VistaAlbumesUsuario, \
                                  VistaCancionesAlbum, VistaLogIn, \
                                  VistaAlbumesCanciones, VistaRecursosCompartidos, \
                                  VistaUsuarios, VistaUsuario, VistaAlbumes, \
-                                 VistaUsuariosCompartidosPorTipo, VistaComentariosCancion
+                                 VistaUsuariosCompartidosPorTipo
 
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS, cross_origin
@@ -39,11 +39,10 @@ api.add_resource(VistaAlbumes, '/albumes')
 api.add_resource(VistaNotificacionUsuario, '/usuario/<int:id_usuario>/notificaciones')
 api.add_resource(VistaComentarios, '/comentario')
 api.add_resource(VistaComentario, '/comentario/<int:id_comentario>')
-api.add_resource(VistaComentariosAlbum, '/comentario/album/<int:id_album>')
-api.add_resource(VistaComentariosCancion, '/comentario/cancion/<int:id_cancion>')
+api.add_resource(VistaComentariosPorTipo, '/comentario/<int:id_recurso>/<string:tipo_recurso>')
 
 jwt = JWTManager(app)
 
-# import logging
-# logging.basicConfig()
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
