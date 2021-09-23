@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 from flask import request
 from flask.json import JSONEncoder
@@ -8,7 +7,7 @@ from sqlalchemy.orm import query
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
-from datetime import datetime
+import datetime
 import pytz
 
 cancion_schema = CancionSchema()
@@ -328,7 +327,7 @@ class VistaComentarios(Resource):
             return "El texto no puede ser vacio o el texto excede los 1000 caracteres.", 400
 
         comentario = Comentario(
-            time=datetime.now(tz=None),
+            time=datetime.datetime.now(pytz.timezone('Etc/GMT+5')),
             usuario=usuario,
             texto=texto,
         )
