@@ -210,36 +210,17 @@ class VistaRecursosCompartidos(Resource):
         tipo_recurso = request.json["tipo_recurso"]
         id_recurso = request.json["id_recurso"]
 
-        if usuario_destino == None or usuario_origen_id == None:
-            db.session.rollback()
-            return "Error. El usuario destinatario o de origen no puede ser vacio", 400
+        check = self.check_data_recurso_compartido(usuario_destino, usuario_origen_id, tipo_recurso, id_recurso)
 
-        if type(usuario_destino) != str:
-            db.session.rollback()
-            return "Error. El usuario destinatario debe ser un texto", 400
+        if check is str:
+            return check, 400
 
-        if type(usuario_origen_id) != int:
-            db.session.rollback()
-            return "Error. El id de usuario origen debe ser un numero", 400
-
+        usuarios_destinos = usuario_destino.split(',')
         usuario_o = Usuario.query.filter(Usuario.id == usuario_origen_id).first()
         if usuario_o is None:
             db.session.rollback()
             return "El usuario origen no existe", 400
 
-        if tipo_recurso == None:
-            db.session.rollback()
-            return "Error. El tipo de recurso no puede ser vacio", 400
-
-        if tipo_recurso != "ALBUM" and tipo_recurso != "CANCION":
-            db.session.rollback()
-            return "Error. El tipo de recurso debe ser ALBUM o CANCION", 400
-
-        if id_recurso == None:
-            db.session.rollback()
-            return "Error. El id de recurso no puede ser vacio", 400
-
-        usuarios_destinos = usuario_destino.split(',')
         for ud in usuarios_destinos:
             if usuario_o.nombre == ud:
                 db.session.rollback()
@@ -247,28 +228,48 @@ class VistaRecursosCompartidos(Resource):
 
             usuario_d = Usuario.query.filter(Usuario.nombre == ud).first()
             if usuario_d is None:
-                if tipo_recurso == "ALBUM":
-                    db.session.rollback()
-                    return 'No se puede compartir el álbum porque una o más personas no se encuentran registradas en Ionic.', 400
-                else:
-                    db.session.rollback()
-                    return 'No se puede compartir la canción porque una o más personas no se encuentran registradas en Ionic.', 400
+                label = "el album" if tipo_recurso == "ALBUM" else "la canción"
+                db.session.rollback()
+                return 'No se puede compartir ' + label + ' porque una o más personas no se encuentran registradas en Ionic.', 400
 
             recurso_compartido = RecursoCompartido(
                 tipo_recurso= tipo_recurso,
                 usuario_origen_id=usuario_origen_id,
                 usuario_destino_id=usuario_d.id,
             )
-            if tipo_recurso == "ALBUM":
-                recurso_compartido.album_id = id_recurso
-            else:
-                recurso_compartido.cancion_id = id_recurso
+            recurso_compartido.album_id = id_recurso if tipo_recurso == "ALBUM" else recurso_compartido.cancion_id = id_recurso
 
             db.session.add(recurso_compartido)
 
         db.session.commit()
         return recurso_compartido_schema.dump(recurso_compartido)
 
+    def check_data_recurso_compartido(self, usuario_destino, usuario_origen_id, tipo_recurso, id_recurso):
+        if usuario_destino == None or usuario_origen_id == None:
+            db.session.rollback()
+            return "Error. El usuario destinatario o de origen no puede ser vacio."
+
+        if type(usuario_destino) != str:
+            db.session.rollback()
+            return "Error. El usuario destinatario debe ser un texto."
+
+        if type(usuario_origen_id) != int:
+            db.session.rollback()
+            return "Error. El id de usuario origen debe ser un numero."
+
+        if tipo_recurso == None:
+            db.session.rollback()
+            return "Error. El tipo de recurso no puede ser vacio."
+
+        if tipo_recurso != "ALBUM" and tipo_recurso != "CANCION":
+            db.session.rollback()
+            return "Error. El tipo de recurso debe ser ALBUM o CANCION."
+
+        if id_recurso == None:
+            db.session.rollback()
+            return "Error. El id de recurso no puede ser vacio."
+
+        return True
 
 class VistaRecursoCompartido(Resource):
 
