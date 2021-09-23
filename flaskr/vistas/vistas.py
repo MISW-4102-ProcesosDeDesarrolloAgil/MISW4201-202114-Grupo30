@@ -1,7 +1,7 @@
-from datetime import datetime
+import json
 from flask import request
 from flask.json import JSONEncoder
-from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, Comentario, ComentarioSchema, Notificacion, TipoNotificacion, NotificacionSchema
+from flaskr.modelos.modelos import db, Cancion, CancionSchema, Usuario, UsuarioSchema, Album, AlbumSchema, RecursoCompartido, RecursoCompartidoSchema, Comentario, ComentarioSchema, Notificacion, TipoNotificacion, NotificacionSchema, ComentarioRespuestaSchema
 from marshmallow.fields import Date
 from sqlalchemy.orm import query
 from flask_restful import Resource
@@ -14,9 +14,9 @@ cancion_schema = CancionSchema()
 usuario_schema = UsuarioSchema()
 album_schema = AlbumSchema()
 recurso_compartido_schema = RecursoCompartidoSchema()
-comentario_schema = ComentarioSchema()
 notificacion_schema = NotificacionSchema()
-
+comentario_schema = ComentarioSchema()
+comentario_respuesta_schema = ComentarioRespuestaSchema()
 
 class VistaCancionesUsuario(Resource):
 
@@ -328,7 +328,7 @@ class VistaComentarios(Resource):
             return "El texto no puede ser vacio o el texto excede los 1000 caracteres.", 400
 
         comentario = Comentario(
-            time=datetime.now(tz=None),
+            time=datetime.datetime.now(pytz.timezone('Etc/GMT+5')),
             usuario=usuario,
             texto=texto,
         )
@@ -350,6 +350,7 @@ class VistaComentarios(Resource):
 class VistaComentario(Resource):
     def get(self, id_comentario):
         return comentario_schema.dump(Comentario.query.get_or_404(id_comentario))
+
 class VistaComentariosAlbum(Resource):
     def get(self, id_album):
 
@@ -366,12 +367,33 @@ class VistaComentariosAlbum(Resource):
                 'album_id': c['album_id'],
                 'time': c['time'],
                 'texto': c['texto'],
-                'usuario': c['nombre']
+                'nombre_usuario': c['nombre']
             }
             response.append(r)
 
-        return JSONEncoder().encode(response)
+        return [comentario_respuesta_schema.dump(cr) for cr in response]
 
+class VistaComentariosCancion(Resource):
+    def get(self, id_cancion):
+
+        comentarios = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
+            join(Comentario, Comentario.usuario == Usuario.id). \
+            filter(Comentario.cancion_id == id_cancion). \
+            order_by(Comentario.time).all()
+
+        response = []
+        for c in comentarios:
+            r = {
+                "id": c['id'],
+                "cancion_id": c['cancion_id'],
+                'album_id': c['album_id'],
+                'time': c['time'].strftime("%m/%d/%Y, %H:%M:%S"),
+                'texto': c['texto'],
+                'nombre_usuario': c['nombre']
+            }
+            response.append(r)
+
+        return [comentario_respuesta_schema.dump(cr) for cr in response]
 
 class VistaNotificacionUsuario(Resource):
 

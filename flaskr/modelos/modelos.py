@@ -121,9 +121,14 @@ class ComentarioSchema(SQLAlchemyAutoSchema):
          model = Comentario
          include_relationships = True
          load_instance = True
+
 class NotificacionSchema(SQLAlchemyAutoSchema):
     tipo_notificacion = EnumADiccionario(attribute=("tipo_notificacion"))
     class Meta:
          model = Notificacion
          include_relationships = True
          load_instance = True
+
+class ComentarioRespuestaSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        fields = ("id", "cancion_id", "album_id", "time", "texto", "nombre_usuario")
