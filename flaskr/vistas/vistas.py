@@ -237,7 +237,10 @@ class VistaRecursosCompartidos(Resource):
                 usuario_origen_id=usuario_origen_id,
                 usuario_destino_id=usuario_d.id,
             )
-            recurso_compartido.album_id = id_recurso if tipo_recurso == "ALBUM" else recurso_compartido.cancion_id = id_recurso
+            if tipo_recurso == "ALBUM":
+                recurso_compartido.album_id = id_recurso
+            else:
+                recurso_compartido.cancion_id = id_recurso
 
             db.session.add(recurso_compartido)
 
@@ -271,30 +274,14 @@ class VistaRecursosCompartidos(Resource):
 
         return True
 
-class VistaRecursoCompartido(Resource):
+class VistaUsuariosCompartidosPorTipo(Resource):
 
-    def get(self, id_recurso_compartido):
-        return recurso_compartido_schema.dump(RecursoCompartido.query.get_or_404(id_recurso_compartido))
+    def get(self, id_recurso, tipo_recurso):
+        if tipo_recurso == "ALBUM":
+            recurso_compartido = RecursoCompartido.query.filter(RecursoCompartido.album_id == id_recurso).group_by(RecursoCompartido.usuario_destino_id).all()
+        else:
+            recurso_compartido = RecursoCompartido.query.filter(RecursoCompartido.cancion_id == id_recurso).group_by(RecursoCompartido.usuario_destino_id).all()
 
-    def delete(self, id_recurso_compartido):
-        recurso_compartido = RecursoCompartido.query.get_or_404(id_recurso_compartido)
-        db.session.delete(recurso_compartido)
-        db.session.commit()
-        return '',204
-class VistaAlbumUsuariosCompartidos(Resource):
-
-    def get(self, id_album):
-        recurso_compartido = RecursoCompartido.query.filter(RecursoCompartido.album_id == id_album).group_by(RecursoCompartido.usuario_destino_id).all()
-        usuarios = []
-        for rc in recurso_compartido:
-            u = Usuario.query.filter(Usuario.id == rc.usuario_destino_id).first()
-            usuarios.append(u)
-        return [usuario_schema.dump(u) for u in usuarios]
-
-class VistaCancionUsuariosCompartidos(Resource):
-
-    def get(self, id_cancion):
-        recurso_compartido = RecursoCompartido.query.filter(RecursoCompartido.cancion_id == id_cancion).group_by(RecursoCompartido.usuario_destino_id).all()
         usuarios = []
         for rc in recurso_compartido:
             u = Usuario.query.filter(Usuario.id == rc.usuario_destino_id).first()
@@ -302,7 +289,6 @@ class VistaCancionUsuariosCompartidos(Resource):
         return [usuario_schema.dump(u) for u in usuarios]
 
 class VistaComentarios(Resource):
-
     # @jwt_required()
     def post(self):
         usuario = request.json["usuario"]

@@ -1,7 +1,15 @@
 from flaskr import create_app
 from flask_restful import Api
 from flaskr.modelos.modelos import db
-from flaskr.vistas.vistas import VistaCancionesUsuario, VistaCancion, VistaNotificacionUsuario, VistaComentario, VistaComentarios, VistaComentariosAlbum, VistaSignIn, VistaAlbum, VistaAlbumesUsuario, VistaCancionesAlbum, VistaLogIn, VistaAlbumesCanciones, VistaRecursoCompartido, VistaRecursosCompartidos, VistaUsuarios, VistaUsuario, VistaAlbumes, VistaAlbumUsuariosCompartidos, VistaCancionUsuariosCompartidos, VistaComentariosCancion
+from flaskr.vistas.vistas import VistaCancionesUsuario, VistaCancion, \
+                                 VistaNotificacionUsuario, VistaComentario, \
+                                 VistaComentarios, VistaComentariosAlbum, \
+                                 VistaSignIn, VistaAlbum, VistaAlbumesUsuario, \
+                                 VistaCancionesAlbum, VistaLogIn, \
+                                 VistaAlbumesCanciones, VistaRecursosCompartidos, \
+                                 VistaUsuarios, VistaUsuario, VistaAlbumes, \
+                                 VistaUsuariosCompartidosPorTipo, VistaComentariosCancion
+
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS, cross_origin
 
@@ -24,9 +32,7 @@ api.add_resource(VistaAlbumesUsuario, '/usuario/<int:id_usuario>/albumes')
 api.add_resource(VistaAlbum, '/album/<int:id_album>')
 api.add_resource(VistaCancionesAlbum, '/album/<int:id_album>/canciones')
 api.add_resource(VistaRecursosCompartidos, '/recurso/compartido')
-api.add_resource(VistaAlbumUsuariosCompartidos, '/recurso/compartido/<int:id_album>/usuario')
-api.add_resource(VistaCancionUsuariosCompartidos, '/recurso/cancion/<int:id_cancion>/usuario')
-api.add_resource(VistaRecursoCompartido, '/recurso/compartido/<int:id_recurso_compartido>')
+api.add_resource(VistaUsuariosCompartidosPorTipo, '/recurso/compartido/<int:id_recurso>/<string:tipo_recurso>')
 api.add_resource(VistaUsuarios, '/usuarios')
 api.add_resource(VistaUsuario, '/usuario/<int:id_usuario>')
 api.add_resource(VistaAlbumes, '/albumes')
@@ -38,6 +44,6 @@ api.add_resource(VistaComentariosCancion, '/comentario/cancion/<int:id_cancion>'
 
 jwt = JWTManager(app)
 
-import logging
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+# import logging
+# logging.basicConfig()
+# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)

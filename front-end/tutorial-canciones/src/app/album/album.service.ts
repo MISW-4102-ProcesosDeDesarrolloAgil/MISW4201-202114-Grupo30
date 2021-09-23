@@ -76,7 +76,7 @@ export class AlbumService {
   }
 
   getUsuariosCompartidos(idAlbum: number): Observable<Usuario[]>{
-    return this.http.get<Usuario[]>(`${this.backUrl}/recurso/compartido/${idAlbum}/usuario`)
+    return this.http.get<Usuario[]>(`${this.backUrl}/recurso/compartido/${idAlbum}/ALBUM`)
   }
 
 }
