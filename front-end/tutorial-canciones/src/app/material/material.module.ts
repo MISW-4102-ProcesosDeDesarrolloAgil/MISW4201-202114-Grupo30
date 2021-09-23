@@ -17,7 +17,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
-import {MatBadgeModule } from '@angular/material/badge'
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
   exports: [
@@ -38,6 +39,7 @@ import {MatBadgeModule } from '@angular/material/badge'
     MatToolbarModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatExpansionModule,
     MatBadgeModule
   ]
 })

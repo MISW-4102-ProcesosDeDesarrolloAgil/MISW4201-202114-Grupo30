@@ -12,11 +12,12 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { AlbumShareComponent } from './album-share/album-share.component';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DuracionPipe } from './pipes/duracion.pipe';
+import { ComentarioModule } from '../comentario/comentario.module';
 
 @NgModule({
   declarations: [AlbumListComponent, AlbumDetailComponent, AlbumCreateComponent, AlbumEditComponent, AlbumJoinCancionComponent, AlbumShareComponent, DuracionPipe],
   imports: [
-    CommonModule, ReactiveFormsModule, AppHeaderModule, MaterialModule, FlexLayoutModule, FormsModule, MatDialogModule
+    CommonModule, ReactiveFormsModule, AppHeaderModule, MaterialModule, FlexLayoutModule, FormsModule, MatDialogModule, ComentarioModule
   ],
   providers: [
     { provide: MAT_DIALOG_DATA, useValue: {} },

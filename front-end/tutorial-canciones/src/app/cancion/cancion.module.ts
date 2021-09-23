@@ -11,12 +11,13 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { DuracionPipe } from './pipes/duracion.pipe';
 import { CancionShareComponent } from './cancion-share/cancion-share.component';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ComentarioModule } from '../comentario/comentario.module';
 
 
 @NgModule({
   declarations: [CancionListComponent, CancionDetailComponent, CancionCreateComponent, CancionEditComponent, DuracionPipe, CancionShareComponent],
   imports: [
-    CommonModule, AppHeaderModule, ReactiveFormsModule, MaterialModule, FlexLayoutModule, FormsModule, MatDialogModule
+    CommonModule, AppHeaderModule, ReactiveFormsModule, MaterialModule, FlexLayoutModule, FormsModule, MatDialogModule, ComentarioModule
   ],
   exports:[CancionListComponent, CancionDetailComponent, CancionCreateComponent, CancionEditComponent]
 })

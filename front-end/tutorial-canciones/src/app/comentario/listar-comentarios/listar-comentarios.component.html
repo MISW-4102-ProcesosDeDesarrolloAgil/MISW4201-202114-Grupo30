@@ -1,0 +1,22 @@
+<div class="comments" *ngIf="postComment!==undefined">
+  <mat-card class="container" fxLayout="row" fxLayoutWrap *ngIf="postComment.length<1">
+    <mat-card-subtitle>No hay comentarios</mat-card-subtitle>
+  </mat-card>
+  <div *ngIf="postComment.length>0">
+    <mat-card class="container" fxLayout="row" fxLayoutWrap>
+      <mat-card-subtitle>{{postComment.length}}
+      <span *ngIf="postComment.length===1"> comentario</span>
+      <span *ngIf="postComment.length>1"> comentarios</span>
+      </mat-card-subtitle>
+      <div *ngFor="let post of postComment; let i = index;">
+            <mat-card>
+              <mat-card-subtitle> <mat-icon>person</mat-icon> {{post.nombre_usuario}} -  {{post.time | date: 'dd/MM/yyyy hh:m:ss'}}</mat-card-subtitle>
+              <mat-card-content>{{post.texto}}</mat-card-content>
+              <mat-card-footer></mat-card-footer>
+            </mat-card>
+            <br/>
+        </div>
+      </mat-card>
+    </div>
+
+</div>

@@ -11,6 +11,7 @@ import { AlbumModule } from './album/album.module';
 import { AppHeaderModule } from './app-header/app-header.module';
 import { CancionModule } from './cancion/cancion.module';
 import { AppHomeModule } from './app-home/app-home.module';
+import { ComentarioModule } from './comentario/comentario.module';
 
 
 @NgModule({
@@ -24,6 +25,7 @@ import { AppHomeModule } from './app-home/app-home.module';
     UsuarioModule,
     AlbumModule,
     CancionModule,
+    ComentarioModule,
     AppHeaderModule,
     AppHomeModule,
     ToastrModule.forRoot({
