@@ -44,14 +44,7 @@ export class ComentarioService {
 }
 
 getComentarios(id_recurso: number, tipo_recurso: string): Observable<Comentario[]>{
-  if (tipo_recurso === 'ALBUM')
-  {
-    return this.http.get<Comentario[]>(`${this.backUrl}/comentario/album/${id_recurso}`)
-  }
-  else
-  {
-    return this.http.get<Comentario[]>(`${this.backUrl}/comentario/cancion/${id_recurso}`)
-  }
+  return this.http.get<Comentario[]>(`${this.backUrl}/comentario/${id_recurso}/${tipo_recurso}`)
 }
 
 }

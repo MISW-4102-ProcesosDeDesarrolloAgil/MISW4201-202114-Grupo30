@@ -341,13 +341,19 @@ class VistaComentario(Resource):
     def get(self, id_comentario):
         return comentario_schema.dump(Comentario.query.get_or_404(id_comentario))
 
-class VistaComentariosAlbum(Resource):
-    def get(self, id_album):
+class VistaComentariosPorTipo(Resource):
+    def get(self, id_recurso, tipo_recurso):
 
-        comentarios = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
+        if tipo_recurso == "ALBUM":
+            query = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
             join(Comentario, Comentario.usuario == Usuario.id). \
-            filter(Comentario.album_id == id_album). \
-            order_by(Comentario.time).all()
+            order_by(Comentario.time).filter(Comentario.album_id == id_recurso)
+        else:
+            query = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
+            join(Comentario, Comentario.usuario == Usuario.id). \
+            order_by(Comentario.time).filter(Comentario.cancion_id == id_recurso)
+
+        comentarios = query.all()
 
         response = []
         for c in comentarios:
@@ -356,28 +362,6 @@ class VistaComentariosAlbum(Resource):
                 'cancion_id': c['cancion_id'],
                 'album_id': c['album_id'],
                 'time': c['time'],
-                'texto': c['texto'],
-                'nombre_usuario': c['nombre']
-            }
-            response.append(r)
-
-        return [comentario_respuesta_schema.dump(cr) for cr in response]
-
-class VistaComentariosCancion(Resource):
-    def get(self, id_cancion):
-
-        comentarios = db.session.query(Comentario.id, Comentario.cancion_id, Comentario.album_id, Comentario.time, Comentario.texto, Usuario.nombre.label('nombre')). \
-            join(Comentario, Comentario.usuario == Usuario.id). \
-            filter(Comentario.cancion_id == id_cancion). \
-            order_by(Comentario.time).all()
-
-        response = []
-        for c in comentarios:
-            r = {
-                "id": c['id'],
-                "cancion_id": c['cancion_id'],
-                'album_id': c['album_id'],
-                'time': c['time'].strftime("%m/%d/%Y, %H:%M:%S"),
                 'texto': c['texto'],
                 'nombre_usuario': c['nombre']
             }
