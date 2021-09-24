@@ -44,7 +44,7 @@ export class CrearComentarioComponent implements OnInit {
 
   createForm() {
     this.commentForm = this.formBuilder.group({
-      comment: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(this.maxNumberOfCharacters)]]
+      comment: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(this.maxNumberOfCharacters)]]
     });
   }
 
