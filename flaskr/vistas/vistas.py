@@ -272,7 +272,7 @@ class VistaRecursosCompartidos(Resource):
             db.session.rollback()
             return "Error. El id de recurso no puede ser vacio."
 
-        return True
+        return ''
 
 class VistaUsuariosCompartidosPorTipo(Resource):
 
