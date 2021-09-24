@@ -1,23 +1,22 @@
 
-<br/>
 <mat-expansion-panel>
 
   <mat-expansion-panel-header>
     <mat-panel-title>
-      Comentarios
+      <h2>Comentarios</h2>
     </mat-panel-title>
   </mat-expansion-panel-header>
 
 <div fxLayout="row" fxLayoutGap="20px" fxLayout.xs="column" fxLayoutAlign="center center">
   <div fxFlex="60" fxLayout="column">
 
-  <form [formGroup]="commentForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="commentForm" (ngSubmit)="enviarComentario()" autocomplete="off">
 
     <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="20px">
 
-      <mat-form-field fxFlex="100" appearance="fill">
+      <mat-form-field fxFlex="100" appearance="fill" style="width: 100%;">
 
-          <textarea matInput formControlName="comment" placeholder="Deja tu comentario"(ngModelChange)="onModelChange($event)"> </textarea>
+          <textarea matInput formControlName="comment" placeholder="Deja tu comentario" (ngModelChange)="onModelChange($event)"> </textarea>
 
           <div class="invalid-feedback" *ngIf="submitted && commentForm.controls['comment'].errors">
 
@@ -30,13 +29,13 @@
             </span>
 
             <span class="form-text text-danger" *ngIf="commentForm.controls['comment'].errors.maxlength">
-                La descripción del álbum no debe superar los 512 carácteres
+                La descripción del álbum no debe superar los 1000 carácteres
             </span>
 
           </div>
 
           <div>
-            {{numberOfCharacters}} / {{maxNumberOfCharacters}}
+            {{numberOfCharacters}} / {{maxNumberOfCharacters - numberOfCharacters}}
           </div>
 
       </mat-form-field>

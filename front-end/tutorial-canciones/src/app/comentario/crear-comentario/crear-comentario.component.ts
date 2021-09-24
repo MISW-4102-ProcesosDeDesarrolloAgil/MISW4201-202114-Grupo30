@@ -93,7 +93,7 @@ export class CrearComentarioComponent implements OnInit {
   }
 
 
-  onSubmit() {
+  enviarComentario() {
     this.submitted = true;
     if (!this.commentForm.invalid) {
 
@@ -110,7 +110,8 @@ export class CrearComentarioComponent implements OnInit {
   }
 
   cancelCreate() {
-
+    this.commentForm.reset();
+    this.numberOfCharacters = 0;
   }
 
   onModelChange(textValue: string): void {
