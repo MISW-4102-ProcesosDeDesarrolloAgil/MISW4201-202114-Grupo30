@@ -1,0 +1,64 @@
+
+<mat-expansion-panel>
+
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      <h2>Comentarios</h2>
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+
+<div fxLayout="row" fxLayoutGap="20px" fxLayout.xs="column" fxLayoutAlign="center center">
+  <div fxFlex="60" fxLayout="column">
+
+  <form [formGroup]="commentForm" (ngSubmit)="enviarComentario()" autocomplete="off">
+
+    <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="20px">
+
+      <mat-form-field fxFlex="100" appearance="fill" style="width: 100%;">
+
+          <textarea matInput formControlName="comment" placeholder="Deja tu comentario" (ngModelChange)="onModelChange($event)"> </textarea>
+
+          <div class="invalid-feedback" *ngIf="submitted && commentForm.controls['comment'].errors">
+
+            <span class="form-text text-danger" *ngIf="commentForm.controls['comment'].errors.required">
+                Debe ingresar una descripción para el álbum
+            </span>
+
+            <span class="form-text text-danger" *ngIf="commentForm.controls['comment'].errors.minlength">
+                La descripción del álbum debe tener por lo menos un carácter
+            </span>
+
+            <span class="form-text text-danger" *ngIf="commentForm.controls['comment'].errors.maxlength">
+                La descripción del álbum no debe superar los 1000 carácteres
+            </span>
+
+          </div>
+
+          <div>
+            {{numberOfCharacters}} / {{maxNumberOfCharacters - numberOfCharacters}}
+          </div>
+
+      </mat-form-field>
+  </div>
+
+  <div fxLayout class="button-row">
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="!commentForm.valid">
+        <mat-icon>comment</mat-icon>
+        Comentar
+    </button>
+
+    <button mat-raised-button (click)="cancelCreate()">
+        <mat-icon>cancel</mat-icon>
+        Cancelar
+    </button>
+
+  </div>
+
+  </form>
+
+  </div>
+</div>
+
+</mat-expansion-panel>
+

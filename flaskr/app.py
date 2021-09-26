@@ -1,7 +1,15 @@
 from flaskr import create_app
 from flask_restful import Api
 from flaskr.modelos.modelos import db
-from flaskr.vistas.vistas import VistaCancionesUsuario, VistaCancion, VistaNotificacionUsuario, VistaSignIn, VistaAlbum, VistaAlbumesUsuario, VistaCancionesAlbum, VistaLogIn, VistaAlbumesCanciones, VistaRecursoCompartido, VistaRecursosCompartidos, VistaUsuarios, VistaUsuario, VistaAlbumes, VistaAlbumUsuariosCompartidos, VistaCancionUsuariosCompartidos
+from flaskr.vistas.vistas import VistaCancionesUsuario, VistaCancion, \
+                                 VistaNotificacionUsuario, VistaComentario, \
+                                 VistaComentarios, VistaComentariosPorTipo, \
+                                 VistaSignIn, VistaAlbum, VistaAlbumesUsuario, \
+                                 VistaCancionesAlbum, VistaLogIn, \
+                                 VistaAlbumesCanciones, VistaRecursosCompartidos, \
+                                 VistaUsuarios, VistaUsuario, VistaAlbumes, \
+                                 VistaUsuariosCompartidosPorTipo
+
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS, cross_origin
 
@@ -24,13 +32,14 @@ api.add_resource(VistaAlbumesUsuario, '/usuario/<int:id_usuario>/albumes')
 api.add_resource(VistaAlbum, '/album/<int:id_album>')
 api.add_resource(VistaCancionesAlbum, '/album/<int:id_album>/canciones')
 api.add_resource(VistaRecursosCompartidos, '/recurso/compartido')
-api.add_resource(VistaAlbumUsuariosCompartidos, '/recurso/compartido/<int:id_album>/usuario')
-api.add_resource(VistaCancionUsuariosCompartidos, '/recurso/cancion/<int:id_cancion>/usuario')
-api.add_resource(VistaRecursoCompartido, '/recurso/compartido/<int:id_recurso_compartido>')
+api.add_resource(VistaUsuariosCompartidosPorTipo, '/recurso/compartido/<int:id_recurso>/<string:tipo_recurso>')
 api.add_resource(VistaUsuarios, '/usuarios')
 api.add_resource(VistaUsuario, '/usuario/<int:id_usuario>')
 api.add_resource(VistaAlbumes, '/albumes')
 api.add_resource(VistaNotificacionUsuario, '/usuario/<int:id_usuario>/notificaciones')
+api.add_resource(VistaComentarios, '/comentario')
+api.add_resource(VistaComentario, '/comentario/<int:id_comentario>')
+api.add_resource(VistaComentariosPorTipo, '/comentario/<int:id_recurso>/<string:tipo_recurso>')
 
 jwt = JWTManager(app)
 

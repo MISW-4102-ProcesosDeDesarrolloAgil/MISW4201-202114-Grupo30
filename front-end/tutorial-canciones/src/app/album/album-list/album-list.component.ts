@@ -47,16 +47,13 @@ export class AlbumListComponent implements OnInit {
   getAlbumes():void{
     this.albumService.getAlbumes(this.userId, this.token)
     .subscribe(albumes => {
-      console.log(albumes)
       this.albumes = albumes
       this.mostrarAlbumes = albumes
-      console.log(albumes)
       if(albumes.length>0){
         this.onSelect(this.mostrarAlbumes[0], 0)
       }
     },
     error => {
-      console.log(error)
       if(error.statusText === "UNAUTHORIZED"){
         this.showWarning("Su sesión ha caducado, por favor vuelva a iniciar sesión.")
         this.cerrarSession();
@@ -73,7 +70,7 @@ export class AlbumListComponent implements OnInit {
   }
 
   onSelect(a: Album, index: number){
-    if (a.propio === 1) {
+    //if (a.propio === 1) {
       this.indiceSeleccionado = index
       this.albumSeleccionado = a
       this.albumService.getCancionesAlbum(a.id, this.token)
@@ -84,7 +81,7 @@ export class AlbumListComponent implements OnInit {
       error =>{
         this.showError("Ha ocurrido un error, " + error.message)
       })
-    }
+    //}
   }
 
   getInterpretes(canciones: Array<Cancion>): Array<string>{

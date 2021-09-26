@@ -70,7 +70,7 @@ export class CancionService {
   }
 
   getUsuariosCompartidos(idCancion: number): Observable<any[]>{
-    return this.http.get<any[]>(`${this.backUrl}/recurso/cancion/${idCancion}/usuario`)
+    return this.http.get<any[]>(`${this.backUrl}/recurso/compartido/${idCancion}/CANCION`)
   }
 
 }

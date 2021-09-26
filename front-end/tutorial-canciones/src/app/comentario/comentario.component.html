@@ -1,0 +1,4 @@
+<app-crear-comentario (usercomment)="receiveComment($event)" [userId]="userId" [token]="token" [resourceId]="resourceId" [resourceType]="resourceType">
+</app-crear-comentario>
+<app-listar-comentarios [postComment]="comments" (countComments)="recieveCount($event)" [userId]="userId" [token]="token" [resourceId]="resourceId" [resourceType]="resourceType">
+</app-listar-comentarios>
